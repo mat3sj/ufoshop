@@ -1,8 +1,8 @@
 from django import forms
 from django.contrib import admin
+from django.utils.html import format_html
 
-
-from ufo_shop.models import Item, Picture, Category, Location
+from ufo_shop.models import *
 
 
 class PictureInlineForm(forms.ModelForm):
@@ -31,9 +31,30 @@ class ItemAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'name', '_items')
 
+    def _items(self, obj):
+        count = obj.item_set.count()
+        url = f"/admin/ufo_shop/item/?category__id__exact={obj.id}"
+        return format_html('<a href="{}">{} ({})</a>', url, "Items", count)
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('id', 'created_at', 'user', 'status', '_items_link')
+
+    def _items_link(self, obj):
+        count = obj.orderitem_set.count()
+        url = f"/admin/ufo_shop/orderitem/?order__id__exact={obj.id}"
+        return format_html('<a href="{}">{} ({})</a>', url, "Items", count)
+
+    _items_link.short_description = 'Items'
+
+
+@admin.register(OrderItem)
+class OrderItemtAdmin(admin.ModelAdmin):
+    list_display = ('id', 'order', 'item', 'amount')

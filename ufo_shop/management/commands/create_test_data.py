@@ -25,7 +25,7 @@ class Command(BaseCommand):
         if not Item.objects.filter(name='Tričko s tučňákem').exists():
             t_shirt = Item.objects.create(
                 name='Tričko s tučňákem',
-                supplier=user,
+                merchandiser=user,
                 amount=88,
                 short_description='Kvalitní bavlněné tričko s potiskem tučňáka',
                 is_active=True,
@@ -37,7 +37,7 @@ class Command(BaseCommand):
         if not Item.objects.filter(name='Fešácký nákolenky').exists():
             pads = Item.objects.create(
                 name='Fešácký nákolenky',
-                supplier=user,
+                merchandiser=user,
                 amount=88,
                 short_description='Pohodlné a odolné nákolenky pro Ultimate frisbee',
                 is_active=True,
@@ -52,7 +52,7 @@ class Command(BaseCommand):
                 user=user,
                 status=1  # In Cart
             )
-            ItemInCart.objects.create(
+            OrderItem.objects.create(
                 order=cart_order,
                 amount=2,
                 item=Item.objects.get(name='Fešácký nákolenky')
@@ -65,7 +65,7 @@ class Command(BaseCommand):
                 user=user,
                 status=2  # Ordered
             )
-            ItemInCart.objects.create(
+            OrderItem.objects.create(
                 order=ordered,
                 item=Item.objects.get(name='Fešácký nákolenky'),
                 amount=1,
@@ -78,12 +78,12 @@ class Command(BaseCommand):
                 user=user,
                 status=3  # Fulfilled
             )
-            ItemInCart.objects.create(
+            OrderItem.objects.create(
                 order=fulfilled,
                 item=Item.objects.get(name='Tričko s tučňákem'),
                 amount=3,
             )
-            ItemInCart.objects.create(
+            OrderItem.objects.create(
                 order=fulfilled,
                 item=Item.objects.get(name='Fešácký nákolenky'),
                 amount=2,

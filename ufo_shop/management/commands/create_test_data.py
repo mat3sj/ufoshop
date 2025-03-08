@@ -8,93 +8,29 @@ from ufo_shop.models import *
 logger = logging.getLogger(__name__)
 
 
+def create_shit(model, name, kwargs):
+    new_instance, created = model.objects.get_or_create(**kwargs)
+    if created:
+        logger.info(f'{model.__name__} with name: {name} was created')
+    else:
+        logger.info(f'{model.__name__} with name: {name} already exists')
+    return new_instance
+
+
+def decorate_model_creation(model):
+    logger.info('########################')
+    logger.info('Creating %ss', model.__name__)
+    logger.info('########################')
+
 class Command(BaseCommand):
     help = f'Create some data in order to play with during the developement'
 
     def handle(self, *args, **options):
-        # Create categories
-        user = User.objects.get(pk=1)
-        try:
-            Category.objects.create(name='Oblečení')
-            logger.info('Category %s was created', 'Oblečení')
-            Category.objects.create(name='Náčiní')
-            logger.info('Category %s was created', 'Náčiní')
-
-        except IntegrityError:
-            pass
-
-        if not Item.objects.filter(name='Tričko s tučňákem').exists():
-            t_shirt = Item.objects.create(
-                name='Tričko s tučňákem',
-                merchandiser=user,
-                amount=88,
-                short_description='Kvalitní bavlněné tričko s potiskem tučňáka',
-                is_active=True,
-                description='Pohodlné bavlněné tričko s roztomilým potiskem tučňáka. Vhodné pro každodenní nošení. K dispozici ve všech velikostech.'
-            )
-            t_shirt.category.add(Category.objects.get(name='Oblečení'))
-            logger.info('Item %s was created', 'Tričko s tučňákem')
-
-        if not Item.objects.filter(name='Fešácký nákolenky').exists():
-            pads = Item.objects.create(
-                name='Fešácký nákolenky',
-                merchandiser=user,
-                amount=88,
-                short_description='Pohodlné a odolné nákolenky pro Ultimate frisbee',
-                is_active=True,
-                description='Kvalitní nákolenky speciálně navržené pro Ultimate frisbee. Chrání kolena při skluzech a pádech. Elastický materiál zajišťuje pohodlné nošení. Dostupné ve velikostech S-XL.'
-            )
-            pads.category.add(Category.objects.get(name='Náčiní'))
-            logger.info('Item %s was created', 'Fešácký nákolenky')
-        # Create test orders
-        # Order in cart
-        if not Order.objects.filter(user=user, status=1).exists():
-            cart_order = Order.objects.create(
-                user=user,
-                status=1  # In Cart
-            )
-            OrderItem.objects.create(
-                order=cart_order,
-                amount=2,
-                item=Item.objects.get(name='Fešácký nákolenky')
-            )
-            logger.info('Order in cart was created')
-
-        # Ordered order
-        if not Order.objects.filter(user=user, status=2).exists():
-            ordered = Order.objects.create(
-                user=user,
-                status=2  # Ordered
-            )
-            OrderItem.objects.create(
-                order=ordered,
-                item=Item.objects.get(name='Fešácký nákolenky'),
-                amount=1,
-            )
-            logger.info('Ordered order was created')
-
-        # Fulfilled order  
-        if not Order.objects.filter(user=user, status=3).exists():
-            fulfilled = Order.objects.create(
-                user=user,
-                status=3  # Fulfilled
-            )
-            OrderItem.objects.create(
-                order=fulfilled,
-                item=Item.objects.get(name='Tričko s tučňákem'),
-                amount=3,
-            )
-            OrderItem.objects.create(
-                order=fulfilled,
-                item=Item.objects.get(name='Fešácký nákolenky'),
-                amount=2,
-            )
-            logger.info('Fulfilled order was created')
 
         ###############################################################################
         # Create some users
         ###############################################################################
-
+        decorate_model_creation(User)
         admin, created = User.objects.get_or_create(
             username=settings.SUPERUSER_NAME,
             defaults={
@@ -143,3 +79,75 @@ class Command(BaseCommand):
             logger.info("User 'test_user' was created")
         else:
             logger.info("User 'test_user' already exists")
+
+        ###############################################################################
+        # Create some categories
+        ###############################################################################
+        decorate_model_creation(Category)
+        clothes_category = create_shit(Category, 'Oblečení', dict(name='Oblečení'))
+        gear_category = create_shit(Category, 'Náčiní', dict(name='Náčiní'))
+
+        ###############################################################################
+        # Create some Items
+        ###############################################################################
+        decorate_model_creation(Item)
+        t_shirt = create_shit(Item, 'Tričko s tučňákem', dict(
+            name='Tričko s tučňákem',
+            merchandiser=admin,
+            amount=88,
+            short_description='Kvalitní bavlněné tričko s potiskem tučňáka',
+            is_active=True,
+            description='Pohodlné bavlněné tričko s roztomilým potiskem tučňáka. Vhodné pro každodenní nošení. K dispozici ve všech velikostech.'
+        ))
+
+        long_socks = create_shit(Item, 'Fešácký nákolenky', dict(
+            name='Fešácký nákolenky',
+            merchandiser=admin,
+            amount=88,
+            short_description='Pohodlné a odolné nákolenky pro Ultimate frisbee',
+            is_active=True,
+            description='Kvalitní nákolenky speciálně navržené pro Ultimate frisbee. Chrání kolena při skluzech a pádech. Elastický materiál zajišťuje pohodlné nošení. Dostupné ve velikostech S-XL.'
+        ))
+
+        ###############################################################################
+        # Create some Orders
+        ###############################################################################
+        decorate_model_creation(Order)
+        # Order in cart
+        cart_order = create_shit(Order, 'Order in cart', dict(
+            user=admin,
+            status=1  # In Cart
+        ))
+        order_item_1 = create_shit(OrderItem, 'Order item 1', dict(
+            order=cart_order,
+            amount=2,
+            item=long_socks
+        ))
+
+        # Ordered order
+        ordered = create_shit(Order, 'Order ordered', dict(
+            user=admin,
+            status=2  # Ordered
+        ))
+        order_item_2 = create_shit(OrderItem, 'Order item 2', dict(
+            order=ordered,
+            item=long_socks,
+            amount=1,
+        ))
+
+        # Fulfilled order
+        fulfilled = create_shit(Order, 'Order fulfilled', dict(
+            user=admin,
+            status=3  # Fulfilled
+        ))
+        order_item_3 = create_shit(OrderItem, 'Order item 3', dict(
+            order=fulfilled,
+            item=t_shirt,
+            amount=3,
+        ))
+        order_item_4 = create_shit(OrderItem, 'Order item 4', dict(
+            order=fulfilled,
+            item=long_socks,
+            amount=2,
+        ))
+        logger.info('Fulfilled order was created')

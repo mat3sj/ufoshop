@@ -20,6 +20,7 @@ class Category(models.Model):
 class Item(models.Model):
     name = models.CharField(max_length=255)
     merchandiser = models.ForeignKey(User, on_delete=models.CASCADE)
+    price = models.IntegerField(default=0)
     amount = models.IntegerField(null=True, blank=True)
     location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True, blank=True)
     short_description = models.CharField(max_length=255, default='')

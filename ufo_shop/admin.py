@@ -21,33 +21,41 @@ class PictureInline(admin.TabularInline):
     model = Picture.items.through
     extra = 1  # adjust to your needs
 
+    @admin.register(Item)
+    class ItemAdmin(admin.ModelAdmin):
+        list_display = ('name', 'merchandiser', 'price', 'amount', 'location', 'category_list', 'is_active',
+                        'created_at')
+        list_filter = ('is_active', 'location', 'category')
+        search_fields = ('name', 'short_description')
+        ordering = ('-created_at',)
+        # inlines = [PictureInline]
+        exclude = ('product_imgs',)
 
-@admin.register(Item)
-class ItemAdmin(admin.ModelAdmin):
-    inlines = [PictureInline]
-    exclude = ('product_imgs',)
+        def category_list(self, obj):
+            return ", ".join([category.name for category in obj.category.all()])
 
-    def get_queryset(self, request):
-        """
-        Customize the queryset of items displayed in the admin.
-        Restrict to items created by the logged-in user if the user
-        belongs to the "Merchandiser" group.
-        """
+        category_list.short_description = 'Categories'
 
-        qs = super().get_queryset(request)
-        # Check if the user is in the "Merchandiser" group
-        if request.user.groups.filter(name="Merchandiser").exists():
-            return qs.filter(merchandiser=request.user)
-        return qs
+        def get_queryset(self, request):
+            """
+            Customize the queryset of items displayed in the admin.
+            Restrict to items created by the logged-in user if the user
+            belongs to the "Merchandiser" group.
+            """
+            qs = super().get_queryset(request)
+            # Check if the user is in the "Merchandiser" group
+            if request.user.groups.filter(name="Merchandiser").exists():
+                return qs.filter(merchandiser=request.user)
+            return qs
 
-    def save_model(self, request, obj, form, change):
-        """
-        Automatically set the `merchandiser` field (creator) to the logged-in user
-        when saving an item.
-        """
-        if not change:  # For new objects
-            obj.merchandiser = request.user
-        super().save_model(request, obj, form, change)
+        def save_model(self, request, obj, form, change):
+            """
+            Automatically set the `merchandiser` field (creator) to the logged-in user
+            when saving an item.
+            """
+            if not change:  # For new objects
+                obj.merchandiser = request.user
+            super().save_model(request, obj, form, change)
 
 
 

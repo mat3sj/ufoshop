@@ -10,27 +10,31 @@
        style="background-color: #f8f9fa; border-right: 1px solid #dee2e6; padding: 20px; margin-right: 15px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); border-radius: 8px; min-height: 100vh;">
   <h5>Filter Items</h5>
         <form method="get">
-            <div class="mb-3">
-                <label for="category" class="form-label">Category</label>
-                <select name="category" id="category" class="form-select">
-                    <option value="">All Categories</option>
-                    {% for category in categories %}
-                    <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
-                    {% endfor %}
-                </select>
+          <div class="mb-3">
+            <label class="form-label">Category</label>
+            <div class="btn-group d-flex flex-wrap gap-2" role="group" aria-label="Category filters">
+              <a href="?{% if request.GET.user %}user={{ request.GET.user }}&{% endif %}"
+                 class="btn btn-outline-primary rounded-pill {% if not request.GET.category %}active{% endif %}">All
+                Categories</a>
+              {% for category in categories %}
+                <a href="?category={{ category.id }}{% if request.GET.user %}&user={{ request.GET.user }}{% endif %}"
+                   class="btn btn-outline-primary rounded-pill {% if request.GET.category == category.id|stringformat:'s' %}active{% endif %}">{{ category.name }}</a>
+              {% endfor %}
             </div>
+          </div>
 
-            <div class="mb-3">
-                <label for="user" class="form-label">Created By</label>
-                <select name="user" id="user" class="form-select">
-                    <option value="">All Users</option>
-                    {% for user in users %}
-                    <option value="{{ user.id }}" {% if request.GET.user == user.id|stringformat:"s" %}selected{% endif %}>{{ user.username }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+          <!-- Merchandiser filter -->
+          {#            <div class="mb-3">#}
+          {#                <label for="user" class="form-label">Created By</label>#}
+{#                <select name="user" id="user" class="form-select">#}
+{#                    <option value="">All Users</option>#}
+{#                    {% for user in users %}#}
+{#                    <option value="{{ user.id }}" {% if request.GET.user == user.id|stringformat:"s" %}selected{% endif %}>{{ user.username }}</option>#}
+{#                    {% endfor %}#}
+{#                </select>#}
+{#            </div>#}
 
-            <button type="submit" class="btn btn-primary">Apply Filters</button>
+{#            <button type="submit" class="btn btn-primary">Apply Filters</button>#}
         </form>
     </div>
 

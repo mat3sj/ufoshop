@@ -12,12 +12,13 @@
         <form method="get">
           <div class="mb-3">
             <label class="form-label">Category</label>
-            <div class="btn-group d-flex flex-wrap" role="group" aria-label="Category filters">
+            <div class="btn-group d-flex flex-wrap gap-2" role="group" aria-label="Category filters">
               <a href="?{% if request.GET.user %}user={{ request.GET.user }}&{% endif %}"
-                 class="btn btn-outline-primary {% if not request.GET.category %}active{% endif %}">All Categories</a>
+                 class="btn btn-outline-primary rounded-pill {% if not request.GET.category %}active{% endif %}">All
+                Categories</a>
               {% for category in categories %}
                 <a href="?category={{ category.id }}{% if request.GET.user %}&user={{ request.GET.user }}{% endif %}"
-                   class="btn btn-outline-primary {% if request.GET.category == category.id|stringformat:'s' %}active{% endif %}">{{ category.name }}</a>
+                   class="btn btn-outline-primary rounded-pill {% if request.GET.category == category.id|stringformat:'s' %}active{% endif %}">{{ category.name }}</a>
               {% endfor %}
             </div>
           </div>

@@ -26,9 +26,10 @@ urlpatterns = [
     # Home page
     path('', views.HomeView.as_view(), name='home'),
 
-    # # Shop page
-    # path('shop/', TemplateView.as_view(template_name='shop.html'), name='shop'),
-    #
+    # Shop page
+    path('shop/', views.ItemListView.as_view(), name='shop'),
+    path('item/<int:id>/', views.ItemDetailView.as_view(template_name='ufo_shop/shop.html'), name='item-detail'),
+
     # # About page
     # path('about/', TemplateView.as_view(template_name='about.html'), name='about'),
     #

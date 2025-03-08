@@ -1,0 +1,95 @@
+{% extends "ufo_shop/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans Shop %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Sidebar for Filters -->
+  <div class="col-md-2"
+       style="background-color: #f8f9fa; border-right: 1px solid #dee2e6; padding: 20px; margin-right: 15px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); border-radius: 8px; min-height: 100vh;">
+  <h5>Filter Items</h5>
+        <form method="get">
+            <div class="mb-3">
+                <label for="category" class="form-label">Category</label>
+                <select name="category" id="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="user" class="form-label">Created By</label>
+                <select name="user" id="user" class="form-select">
+                    <option value="">All Users</option>
+                    {% for user in users %}
+                    <option value="{{ user.id }}" {% if request.GET.user == user.id|stringformat:"s" %}selected{% endif %}>{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Apply Filters</button>
+        </form>
+    </div>
+
+    <!-- Main Content -->
+  <div class="col-md-9">
+  <h3>Item List</h3>
+        {% if shop %}
+          <div class="list-group">
+            <div class="row">
+              {% for item in shop %}
+                <div class="col-md-4 mb-4">
+                  <a href="{% url 'item-detail' item.id %}" class="text-decoration-none">
+                    <div class="card h-100">
+                      <img src="{{ item.image.url|default:'#' }}" class="card-img-top" alt="{{ item.name }}"
+                           style="height: 200px; object-fit: cover;">
+                      <div class="card-body">
+                        <h5 class="card-title">{{ item.name }}</h5>
+                        <p class="card-text"><small class="text-muted">
+                          <strong>Category:</strong> {{ item.category.all|join:", " }}
+                        </small></p>
+                        <p class="card-text">{{ item.short_description }}</p>
+                        <p class="card-text"><small class="text-muted">
+                          <strong>Created By:</strong> {{ item.merchandiser.username }}
+                        </small></p>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% else %}
+          <p>No items found matching your criteria.</p>
+        {% endif %}
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+      <nav aria-label="Page navigation">
+      <ul class="pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.user %}user={{ request.GET.user }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+                {% endif %}
+
+                {% for page_num in paginator.page_range %}
+                <li class="page-item {% if page_obj.number == page_num %}active{% endif %}">
+                    <a class="page-link" href="?{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.user %}user={{ request.GET.user }}&{% endif %}page={{ page_num }}">{{ page_num }}</a>
+                </li>
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.user %}user={{ request.GET.user }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

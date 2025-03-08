@@ -1,7 +1,7 @@
-from django.http import HttpResponse
 from django.views import View
+from django.shortcuts import render
 
 
 class HomeView(View):
     def get(self, request, *args, **kwargs):
-        return HttpResponse("Matysek je pan!")
+        return render(request, 'ufo_shop/home.html')

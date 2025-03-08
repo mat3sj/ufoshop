@@ -1,7 +1,8 @@
 from django.core.management import BaseCommand
 from django.db import IntegrityError
 import logging
-
+from django.contrib.auth.models import User, Group
+from django.conf import settings
 from ufo_shop.models import *
 
 logger = logging.getLogger(__name__)
@@ -89,3 +90,56 @@ class Command(BaseCommand):
                 amount=2,
             )
             logger.info('Fulfilled order was created')
+
+        ###############################################################################
+        # Create some users
+        ###############################################################################
+
+        admin, created = User.objects.get_or_create(
+            username=settings.SUPERUSER_NAME,
+            defaults={
+                'email': settings.SUPERUSER_EMAIL,
+                'is_staff': True,
+                'is_superuser': True,
+                'is_active': True
+            }
+        )
+        if created:
+            admin.set_password(settings.SUPERUSER_PASS)
+            admin.save()
+            logger.info("Superuser '%s' was created", settings.SUPERUSER_NAME)
+        else:
+            logger.info("Superuser '%s' already exists", settings.SUPERUSER_NAME)
+
+        merchandiser_group, created = Group.objects.get_or_create(name='Merchandiser')
+        # Create 'test_merchandiser' if not exists and assign to 'merchandiser' group
+        test_merchandiser, created = User.objects.get_or_create(
+            username='test_merchandiser',
+            defaults={
+                'email': 'test_merchandiser@example.com',
+                'is_staff': True,
+                'is_active': True
+            }
+        )
+        if created:
+            test_merchandiser.set_password('heslo')
+            test_merchandiser.save()
+            test_merchandiser.groups.add(merchandiser_group)
+            logger.info("User 'test_merchandiser' was created and assigned to 'merchandiser' group")
+        else:
+            logger.info("User 'test_merchandiser' already exists")
+
+        # Create 'test_user' if not exists
+        test_user, created = User.objects.get_or_create(
+            username='test_user',
+            defaults={
+                'email': 'test_user@example.com',
+                'is_active': True
+            }
+        )
+        if created:
+            test_user.set_password('heslo')
+            test_user.save()
+            logger.info("User 'test_user' was created")
+        else:
+            logger.info("User 'test_user' already exists")

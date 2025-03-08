@@ -26,7 +26,30 @@ class PictureInline(admin.TabularInline):
 class ItemAdmin(admin.ModelAdmin):
     inlines = [PictureInline]
     exclude = ('product_imgs',)
-    pass
+
+    def get_queryset(self, request):
+        """
+        Customize the queryset of items displayed in the admin.
+        Restrict to items created by the logged-in user if the user
+        belongs to the "Merchandiser" group.
+        """
+
+        qs = super().get_queryset(request)
+        # Check if the user is in the "Merchandiser" group
+        if request.user.groups.filter(name="Merchandiser").exists():
+            return qs.filter(merchandiser=request.user)
+        return qs
+
+    def save_model(self, request, obj, form, change):
+        """
+        Automatically set the `merchandiser` field (creator) to the logged-in user
+        when saving an item.
+        """
+        if not change:  # For new objects
+            obj.merchandiser = request.user
+        super().save_model(request, obj, form, change)
+
+
 
 
 @admin.register(Category)

@@ -20,6 +20,27 @@ from django.urls import path
 from ufo_shop import views
 
 urlpatterns = [
+    # Admin route
+    path('admin/', admin.site.urls, name='admin'),
+
+    # Home page
     path('', views.HomeView.as_view(), name='home'),
-    path('admin/', admin.site.urls),
+
+    # # Shop page
+    # path('shop/', TemplateView.as_view(template_name='shop.html'), name='shop'),
+    #
+    # # About page
+    # path('about/', TemplateView.as_view(template_name='about.html'), name='about'),
+    #
+    # # User-related pages (to be implemented in views)
+    # path('login/', TemplateView.as_view(template_name='login.html'), name='login'),
+    # path('signup/', TemplateView.as_view(template_name='signup.html'), name='signup'),
+    # path('logout/', TemplateView.as_view(template_name='logout.html'), name='logout'),
+    #
+    # # User profile/orders page
+    # path('orders/', TemplateView.as_view(template_name='orders.html'), name='orders'),
+    #
+    # # Privacy policy and terms of service
+    # path('privacy-policy/', TemplateView.as_view(template_name='privacy_policy.html'), name='privacy_policy'),
+    # path('terms/', TemplateView.as_view(template_name='terms.html'), name='terms'),
 ]

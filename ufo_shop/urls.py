@@ -28,7 +28,7 @@ urlpatterns = [
 
     # Shop page
     path('shop/', views.ItemListView.as_view(), name='shop'),
-    path('item/<int:id>/', views.ItemDetailView.as_view(template_name='ufo_shop/shop.html'), name='item-detail'),
+    path('item/<int:pk>/', views.ItemDetailView.as_view(), name='item-detail'),
 
     # # About page
     # path('about/', TemplateView.as_view(template_name='about.html'), name='about'),

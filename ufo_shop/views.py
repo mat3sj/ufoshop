@@ -14,7 +14,7 @@ class HomeView(View):
 class ItemListView(ListView):
     model = Item
     template_name = 'ufo_shop/shop.html'  # Specify the template
-    context_object_name = 'shop'
+    context_object_name = 'item_list'
     paginate_by = 12
 
     def get_queryset(self):
@@ -42,3 +42,14 @@ class ItemListView(ListView):
 
 class ItemDetailView(DetailView):
     model = Item
+    template_name = 'ufo_shop/item_detail.html'
+    context_object_name = 'item'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['related_items'] = Item.objects.filter(
+            category__in=self.object.category.all(),
+            is_active=True
+        ).exclude(id=self.object.id)[:4]
+        context['categories'] = Category.objects.all()
+        return context

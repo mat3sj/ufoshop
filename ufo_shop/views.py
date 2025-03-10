@@ -3,7 +3,13 @@ from django.views.generic import ListView, DetailView
 
 from django.shortcuts import render
 from ufo_shop.models import Item, Category
-from django.contrib.auth.models import User
+from django.contrib.auth.views import LoginView
+from .forms import EmailAuthenticationForm
+
+
+class MyLoginView(LoginView):
+    authentication_form = EmailAuthenticationForm
+
 
 
 class HomeView(View):

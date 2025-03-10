@@ -32,8 +32,7 @@ class Command(BaseCommand):
         ###############################################################################
         decorate_model_creation(User)
         admin, created = User.objects.get_or_create(
-            username=settings.SUPERUSER_NAME,
-            defaults={
+            **{
                 'email': settings.SUPERUSER_EMAIL,
                 'is_staff': True,
                 'is_superuser': True,
@@ -47,28 +46,25 @@ class Command(BaseCommand):
         else:
             logger.info("Superuser '%s' already exists", settings.SUPERUSER_NAME)
 
-        merchandiser_group, created = Group.objects.get_or_create(name='Merchandiser')
         # Create 'test_merchandiser' if not exists and assign to 'merchandiser' group
         test_merchandiser, created = User.objects.get_or_create(
-            username='test_merchandiser',
-            defaults={
+            **{
                 'email': 'test_merchandiser@example.com',
                 'is_staff': True,
-                'is_active': True
+                'is_active': True,
+                'is_merchandiser': True,
             }
         )
-        if created:
+        if created and test_merchandiser:
             test_merchandiser.set_password('heslo')
             test_merchandiser.save()
-            test_merchandiser.groups.add(merchandiser_group)
             logger.info("User 'test_merchandiser' was created and assigned to 'merchandiser' group")
         else:
             logger.info("User 'test_merchandiser' already exists")
 
         # Create 'test_user' if not exists
         test_user, created = User.objects.get_or_create(
-            username='test_user',
-            defaults={
+            **{
                 'email': 'test_user@example.com',
                 'is_active': True
             }

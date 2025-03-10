@@ -1,8 +1,32 @@
 from django import forms
 from django.contrib import admin
 from django.utils.html import format_html
+from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
 
 from ufo_shop.models import *
+
+
+@admin.register(User)
+class UserAdmin(DefaultUserAdmin):
+    fieldsets = (
+        (None, {"fields": ("email", "password")}),
+        ("Personal info", {"fields": ("first_name", "last_name", "phone")}),
+        ("Permissions",
+         {"fields": ("is_active", "is_staff", "is_superuser", 'is_merchandiser', "groups", "user_permissions")}),
+        ("Important dates", {"fields": ("last_login", "date_joined")}),
+    )
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("email", "password1", "password2", "is_staff", "is_active", 'is_merchandiser'),
+            },
+        ),
+    )
+    list_display = ("email", "first_name", "last_name", "is_staff", 'is_merchandiser', 'is_superuser')
+    search_fields = ("email", "first_name", "last_name")
+    ordering = ("email",)
 
 
 class PictureInlineForm(forms.ModelForm):

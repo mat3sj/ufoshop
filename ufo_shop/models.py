@@ -1,5 +1,16 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 from django.db import models
+
+
+class User(AbstractUser):
+    phone = models.CharField(max_length=15, verbose_name="Phone Number", blank=True, null=True)
+    is_merchandiser = models.BooleanField(default=False, verbose_name="Is Merchandiser")
+    # Change the identification field for authentication to 'email'
+    email = models.EmailField(unique=True, verbose_name="Email Address")
+    username = None
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []  # Remove 'username' from required fields
 
 
 class Location(models.Model):

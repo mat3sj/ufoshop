@@ -19,7 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-ALLOWED_HOSTS = ['ufo-shop-6679.rostiapp.cz', '127.0.0.1']
+ALLOWED_HOSTS = ['ufo-shop-6679.rostiapp.cz', '127.0.0.1', 'localhost']
 SITE_ID = 1
 
 # Application definition
@@ -124,3 +124,5 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'ufo_shop.User'
+LOGIN_REDIRECT_URL = '/'  # Redirect to the home page
+

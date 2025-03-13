@@ -15,21 +15,30 @@
         <li class="nav-item">
           <a class="nav-link" href="{% url 'shop' %}">{% trans "Shop" %}</a>
         </li>
-{#        {% if user.is_authenticated %}#}
-{#          <li class="nav-item">#}
-{#            <a class="nav-link" href="{% url 'orders' %}">{% trans "My Orders" %}</a>#}
-{#          </li>#}
-{#          <li class="nav-item">#}
-{#            <a class="nav-link" href="{% url 'logout' %}">{% trans "Logout" %}</a>#}
-{#          </li>#}
-{#        {% else %}#}
-{#          <li class="nav-item">#}
-{#            <a class="nav-link" href="{% url 'login' %}">{% trans "Login" %}</a>#}
-{#          </li>#}
-{#          <li class="nav-item">#}
-{#            <a class="nav-link" href="{% url 'signup' %}">{% trans "Sign Up" %}</a>#}
-{#          </li>#}
-{#        {% endif %}#}
+        {% if user.is_authenticated %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+               aria-expanded="false">
+              {{ user.email }}
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+{#              <li><a class="dropdown-item" href="{% url 'orders' %}">{% trans "My Orders" %}</a></li>#}
+              <li>
+                <form method="post" action="{% url 'logout' %}">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item">{% trans "Logout" %}</button>
+                </form>
+              </li>
+            </ul>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">{% trans "Login" %}</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'signup' %}">{% trans "Sign Up" %}</a>
+          </li>
+        {% endif %}
       </ul>
       {#              <form action="{% url 'set_language' %}" method="post" class="ms-2">#}
       {#                {% csrf_token %}#}

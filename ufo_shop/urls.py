@@ -33,10 +33,10 @@ urlpatterns = [
     # # About page
     # path('about/', TemplateView.as_view(template_name='about.html'), name='about'),
     #
-    # # User-related pages (to be implemented in views)
-    # path('login/', TemplateView.as_view(template_name='login.html'), name='login'),
-    # path('signup/', TemplateView.as_view(template_name='signup.html'), name='signup'),
-    # path('logout/', TemplateView.as_view(template_name='logout.html'), name='logout'),
+    # User-related pages (to be implemented in views)
+    path('login/', views.CustomLoginView.as_view(), name='login'),
+    path('signup/', views.SignUpView.as_view(), name='signup'),
+    path('logout/', views.CustomLogoutView.as_view(), name='logout'),
     #
     # # User profile/orders page
     # path('orders/', TemplateView.as_view(template_name='orders.html'), name='orders'),

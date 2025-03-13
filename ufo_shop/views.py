@@ -1,15 +1,29 @@
 from django.views import View
-from django.views.generic import ListView, DetailView
-
+from django.views.generic import ListView, DetailView, CreateView
+from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from ufo_shop.models import Item, Category
-from django.contrib.auth.views import LoginView
-from .forms import EmailAuthenticationForm
+from django.contrib.auth.views import LoginView, LogoutView
+from django.urls import reverse_lazy
+from .forms import EmailAuthenticationForm, SignUpForm
 
 
-class MyLoginView(LoginView):
+class CustomLoginView(LoginView):
     authentication_form = EmailAuthenticationForm
+    template_name = 'ufo_shop/login.html'
+    success_url = reverse_lazy('home')
 
+
+class SignUpView(CreateView):
+    model = get_user_model()
+    form_class = SignUpForm  # Use the custom form
+    template_name = 'ufo_shop/signup.html'
+    success_url = reverse_lazy('login')
+
+
+
+class CustomLogoutView(LogoutView):
+    next_page = 'home'
 
 
 class HomeView(View):

@@ -1,3 +1,4 @@
+from django.template.loader import render_to_string
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView
 from django.contrib.auth import get_user_model
@@ -6,7 +7,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from ufo_shop.models import Item, Category
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
-from .forms import EmailAuthenticationForm, SignUpForm
+from ufo_shop.forms import EmailAuthenticationForm, SignUpForm
+from ufo_shop.utils import ufoshop_send_email
 
 
 class CustomLoginView(LoginView):
@@ -21,6 +23,17 @@ class SignUpView(CreateView):
     template_name = 'ufo_shop/signup.html'
     success_url = reverse_lazy('login')
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        user = self.object
+        ufoshop_send_email(
+            subject='Welcome to UFO Shop!',
+            html_message=render_to_string('ufo_shop/email/welcome.html', {
+                'user': user
+            }),
+            recipient_list=[user.email],
+        )
+        return response
 
 
 class CustomLogoutView(LogoutView):

@@ -19,7 +19,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-ALLOWED_HOSTS = ['ufo-shop-6679.rostiapp.cz', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = [
+    # 'ufo-shop-6679.rostiapp.cz',
+    '127.0.0.1',
+    'localhost'
+]
 SITE_ID = 1
 
 # Application definition
@@ -65,6 +69,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.contrib.sites.models.Site',
             ],
         },
     },

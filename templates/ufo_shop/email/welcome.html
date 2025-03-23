@@ -1,0 +1,25 @@
+{% extends "ufo_shop/email/email_base.html" %}
+
+{% block content %}
+  <div class="email-content">
+    <h1>Welcome to UFO Shop!</h1>
+
+    <div class="welcome-message">
+      {% load static %}
+      <p>Dear {{ user.email }},</p>
+      <p>We're excited to have you join our intergalactic marketplace! Thank you for creating an account with UFO
+        Shop.</p>
+      <p>Get ready to explore our unique collection of extraterrestrial items and cosmic curiosities.</p>
+    </div>
+
+    <div class="cta-buttons">
+      <a href="https://{{ site.domain }}{% url 'shop' %}" class="button primary">Start Shopping</a>
+      <a href="{% url 'profile' %}" class="button secondary">View Your Profile</a>
+    </div>
+
+    <div class="footer-info">
+      <p>If you have any questions, feel free to contact our support team.</p>
+      <p>Best regards,<br>The UFO Shop Team</p>
+    </div>
+  </div>
+{% endblock %}

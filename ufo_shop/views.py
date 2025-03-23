@@ -2,6 +2,7 @@ from django.views import View
 from django.views.generic import ListView, DetailView, CreateView
 from django.contrib.auth import get_user_model
 from django.shortcuts import render
+from django.contrib.auth.mixins import LoginRequiredMixin
 from ufo_shop.models import Item, Category
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
@@ -24,6 +25,13 @@ class SignUpView(CreateView):
 
 class CustomLogoutView(LogoutView):
     next_page = 'home'
+
+
+class ProfileView(LoginRequiredMixin, View):
+    def get(self, request):
+        return render(request, 'ufo_shop/profile.html', {
+            'user': request.user
+        })
 
 
 class HomeView(View):

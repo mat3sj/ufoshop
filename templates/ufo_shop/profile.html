@@ -1,0 +1,35 @@
+{% extends 'ufo_shop/base.html' %}
+{% load i18n %}
+
+{% block title %}
+  {% trans "Profile" %}
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card mt-5">
+          <div class="card-body">
+            <h2 class="card-title text-center mb-4">{% trans "Profile" %}</h2>
+
+            <div class="row">
+              <div class="col-md-6">
+                <p><strong>{% trans "Email" %}:</strong> {{ user.email }}</p>
+                <p><strong>{% trans "Name" %}:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+                <p><strong>{% trans "Date joined" %}:</strong> {{ user.date_joined|date }}</p>
+                <p><strong>{% trans "Is merchandiser" %}:</strong> {% if user.is_merchandiser %}✅{% else %}
+                  ❌{% endif %}</p>
+
+              </div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+              <a href="{% url 'home' %}" class="btn btn-secondary">{% trans "Back to Home" %}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

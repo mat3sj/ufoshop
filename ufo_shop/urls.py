@@ -37,6 +37,7 @@ urlpatterns = [
     path('login/', views.CustomLoginView.as_view(), name='login'),
     path('signup/', views.SignUpView.as_view(), name='signup'),
     path('logout/', views.CustomLogoutView.as_view(), name='logout'),
+    path('profile/', views.ProfileView.as_view(), name='profile'),
     #
     # # User profile/orders page
     # path('orders/', TemplateView.as_view(template_name='orders.html'), name='orders'),

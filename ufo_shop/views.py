@@ -26,10 +26,15 @@ class SignUpView(CreateView):
     def form_valid(self, form):
         response = super().form_valid(form)
         user = self.object
+
+        profile_url = self.request.build_absolute_uri(reverse_lazy('profile'))
+        shop_url = self.request.build_absolute_uri(reverse_lazy('shop'))
         ufoshop_send_email(
             subject='Welcome to UFO Shop!',
             html_message=render_to_string('ufo_shop/email/welcome.html', {
-                'user': user
+                'user': user,
+                'profile_url': profile_url,
+                'shop_url': shop_url
             }),
             recipient_list=[user.email],
         )

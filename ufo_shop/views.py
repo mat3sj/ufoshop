@@ -51,6 +51,15 @@ class ProfileView(LoginRequiredMixin, View):
             'user': request.user
         })
 
+class MerchandiserSignupView(LoginRequiredMixin,View):
+    # def get(self, request):
+    #     user = request.user
+    #     return render(request, 'ufo_shop/merchandiser_signup.html', {
+    #         'user': user
+    #     })
+    #
+    # def post(self, request):
+    pass
 
 class HomeView(View):
     def get(self, request, *args, **kwargs):
@@ -64,9 +73,6 @@ class ItemListView(ListView):
     paginate_by = 12
 
     def get_queryset(self):
-        return Item.objects.filter(is_active=True)
-
-    def get_queryset(self):
         queryset = super().get_queryset().filter(is_active=True)  # Only active items
         category = self.request.GET.get('category')
         # user = self.request.GET.get('user')
@@ -78,7 +84,7 @@ class ItemListView(ListView):
         #     queryset = queryset.filter(merchandiser__id=user)
 
         return queryset.distinct()
-    #
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['categories'] = Category.objects.all()  # Pass categories to the template

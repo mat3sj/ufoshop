@@ -8,3 +8,5 @@ django-allauth==0.54.0
 psycopg2-binary
 django-extensions
 Pillow==11.1.0
+django-crispy-forms==2.3
+crispy-bootstrap5

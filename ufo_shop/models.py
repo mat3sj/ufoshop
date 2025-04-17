@@ -10,7 +10,7 @@ class User(AbstractUser):
     username = None
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []  # Remove 'username' from required fields
+    REQUIRED_FIELDS = ['phone']
 
 
 class Location(models.Model):

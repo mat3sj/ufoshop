@@ -38,6 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django_extensions',
 
+    'crispy_forms',
+    'crispy_bootstrap5',
+
     'ufo_shop',
 
     # 'allauth',
@@ -140,3 +143,9 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 DEFAULT_FROM_EMAIL = ''
+
+#############################
+# Crispy forms
+#############################
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"

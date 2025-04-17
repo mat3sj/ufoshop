@@ -1,5 +1,6 @@
 {% extends 'ufo_shop/base.html' %}
 {% load i18n %}
+{% load crispy_forms_tags %}
 
 {% block title %}{% trans "Sign Up" %}{% endblock %}
 
@@ -12,20 +13,8 @@
             <h2 class="card-title text-center mb-4">{% trans "Sign Up" %}</h2>
             <form method="post">
               {% csrf_token %}
-              {% for field in form %}
-                <div class="form-group mb-3">
-                  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                  {{ field }}
-                  {% if field.errors %}
-                    {% for error in field.errors %}
-                      <div class="alert alert-danger mt-1">
-                        {{ error }}
-                      </div>
-                    {% endfor %}
-                  {% endif %}
-                </div>
-              {% endfor %}
-              <button type="submit" class="btn btn-primary w-100">{% trans "Sign Up" %}</button>
+              {{ form|crispy }}
+              <button type="submit" class="btn btn-primary">Sign Up</button>
             </form>
             <div class="text-center mt-3">
               <p>{% trans "Already have an account?" %} <a href="{% url 'login' %}">{% trans "Log In" %}</a></p>

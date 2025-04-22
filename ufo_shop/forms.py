@@ -3,7 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, Submit, Row, Column
+from crispy_forms.layout import Layout, Fieldset, Submit, Row, Column, Div
 
 
 class EmailAuthenticationForm(AuthenticationForm):
@@ -24,7 +24,10 @@ class EmailAuthenticationForm(AuthenticationForm):
                 'username',  # The "email" field
                 'password',  # AuthenticationForm's default "password" field
             ),
-            Submit('submit', 'Login', css_class='btn btn-primary btn-block')
+            Div(
+                Submit('submit', 'Login', css_class='btn btn-primary'),
+                css_class='text-center mt-3'
+            )
         )
 
 
@@ -46,10 +49,11 @@ class SignUpForm(UserCreationForm):
             Fieldset(
                 'Sign Up',  # Section title (optional)
                 'email',
-                Row(
-                    Column('password1', css_class="col-md-6"),
-                    Column('password2', css_class="col-md-6"),
-                ),
+                'password1',
+                'password2',
             ),
-            Submit('submit', 'Sign Up', css_class='btn btn-primary btn-block')
+            Div(
+                Submit('submit', 'Sign Up', css_class='btn btn-primary'),
+                css_class='text-center mt-3'
+            )
         )

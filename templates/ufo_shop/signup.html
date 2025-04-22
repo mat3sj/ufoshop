@@ -13,7 +13,7 @@
             <h2 class="card-title text-center mb-4">{% trans "Sign Up" %}</h2>
             <form method="post" class="needs-validation">
               {% csrf_token %}
-              {{ form|crispy }}
+              {% crispy form %}
             </form>
             <div class="text-center mt-3">
               <p>{% trans "Already have an account?" %} <a href="{% url 'login' %}">{% trans "Log In" %}</a></p>

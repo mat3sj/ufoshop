@@ -16,7 +16,7 @@
 
             <form method="post" class="needs-validation">
               {% csrf_token %}
-              {{ form|crispy }}
+              {% crispy form %}
             </form>
 
 

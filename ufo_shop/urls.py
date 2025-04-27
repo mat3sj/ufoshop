@@ -38,6 +38,7 @@ urlpatterns = [
     path('signup/', views.SignUpView.as_view(), name='signup'),
     path('logout/', views.CustomLogoutView.as_view(), name='logout'),
     path('profile/', views.ProfileView.as_view(), name='profile'),
+    path('merchandiser_shop/', views.MerchandiserShopView.as_view(), name='merchandiser_shop'),
     path('merchandiser_signup/', views.MerchandiserSignupView.as_view(), name='merchandiser_signup'),
     #
     # # User profile/orders page

@@ -24,6 +24,7 @@
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
 {#              <li><a class="dropdown-item" href="{% url 'orders' %}">{% trans "My Orders" %}</a></li>#}
               <li><a class="dropdown-item" href="{% url 'profile' %}">{% trans "Profile" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'merchandiser_shop' %}">{% trans "Manage your shop" %}</a></li>
               <li>
                 <form method="post" action="{% url 'logout' %}">
                   {% csrf_token %}

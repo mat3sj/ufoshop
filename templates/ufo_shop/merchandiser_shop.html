@@ -1,0 +1,19 @@
+{% extends "ufo_shop/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Shop" %}{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <h2 class="my-4">{% trans "My items" %}</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      {% for item in items %}
+        {% include "ufo_shop/item_card.html" with item=item %}
+      {% empty %}
+        <div class="col-12">
+          <p class="text-center">{% trans "No items available." %}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% load i18n %}
+<div class="col-md-4 mb-4">
+  <a href="{% url 'item-detail' item.id %}" class="text-decoration-none">
+    <div class="card h-100">
+      <img src="{{ item.image.url|default:'#' }}" class="card-img-top" alt="{{ item.name }}"
+           style="height: 200px; object-fit: cover;">
+      <div class="card-body">
+        <h5 class="card-title">{{ item.name }}</h5>
+        <p class="card-text"><small class="text-muted">
+          <strong>Category:</strong> {{ item.category.all|join:", " }}
+        </small></p>
+        <p class="card-text">{{ item.short_description }}</p>
+        <p class="card-text"><small class="text-muted">
+          <strong>Created By:</strong> {{ item.merchandiser.username }}
+        </small></p>
+      </div>
+    </div>
+  </a>
+</div>

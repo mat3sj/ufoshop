@@ -5,6 +5,8 @@ from django.contrib.auth import get_user_model
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, Submit, Row, Column, Div
 
+from ufo_shop.models import Item
+
 
 class EmailAuthenticationForm(AuthenticationForm):
     username = forms.EmailField(label="Email", widget=forms.EmailInput(attrs={"autofocus": True}))
@@ -57,3 +59,17 @@ class SignUpForm(UserCreationForm):
                 css_class='text-center mt-3'
             )
         )
+
+
+class ItemForm(forms.ModelForm):
+    class Meta:
+        model = Item
+        # Include all fields you want in the form, excluding the merchandiser
+        # as it will be set automatically in the view.
+        fields = ['name', 'price', 'amount', 'location', 'short_description', 'description', 'category', 'is_active']
+
+    # Optional: Add crispy forms helper for layout customization if needed later
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.helper = FormHelper()
+    #     self.helper.l

@@ -1,25 +1,27 @@
 from django.template.loader import render_to_string
 from django.views import View
-from django.views.generic import ListView, DetailView, CreateView
+# Import UpdateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin
+
+from ufo_shop import forms
 from ufo_shop.models import Item, Category
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
-from ufo_shop.forms import EmailAuthenticationForm, SignUpForm
 from ufo_shop.utils import ufoshop_send_email
 
 
 class CustomLoginView(LoginView):
-    authentication_form = EmailAuthenticationForm
+    authentication_form = forms.EmailAuthenticationForm
     template_name = 'ufo_shop/login.html'
     success_url = reverse_lazy('home')
 
 
 class SignUpView(CreateView):
     model = get_user_model()
-    form_class = SignUpForm  # Use the custom form
+    form_class = forms.SignUpForm  # Use the custom form
     template_name = 'ufo_shop/signup.html'
     success_url = reverse_lazy('login')
 
@@ -114,9 +116,48 @@ class MerchandiserShopView(LoginRequiredMixin, ListView):
     success_url = reverse_lazy('merchandiser_shop')
 
     def get_queryset(self):
+        # Only show items belonging to the logged-in user
         return Item.objects.filter(merchandiser=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['categories'] = Category.objects.all()
+        return context
+
+
+# View for creating a new item
+class ItemCreateView(LoginRequiredMixin, CreateView):
+    model = Item
+    form_class = forms.ItemForm # Use the ItemForm
+    template_name = 'ufo_shop/item_form.html'
+    success_url = reverse_lazy('merchandiser_shop')
+
+    def form_valid(self, form):
+        # Assign the current logged-in user as the merchandiser
+        form.instance.merchandiser = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = 'Create New Item' # Add title for the template
+        return context
+
+
+# View for updating an existing item
+class ItemUpdateView(LoginRequiredMixin, UpdateView):
+    model = Item
+    fields = ['name', 'price', 'amount', 'location', 'short_description', 'description', 'category', 'is_active']
+    template_name = 'ufo_shop/item_form.html'  # Reuse the same template as create
+    success_url = reverse_lazy('merchandiser_shop') # Redirect after successful update
+
+    def get_queryset(self):
+        # Ensure users can only edit their own items
+        queryset = super().get_queryset()
+        if self.request.user.is_superuser:
+            return queryset
+        return queryset.filter(merchandiser=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = 'Edit Item' # Add title for the template
         return context

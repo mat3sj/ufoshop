@@ -29,6 +29,11 @@ urlpatterns = [
     # Shop page
     path('shop/', views.ItemListView.as_view(), name='shop'),
     path('item/<int:pk>/', views.ItemDetailView.as_view(), name='item-detail'),
+    path('merchandiser_shop/', views.MerchandiserShopView.as_view(), name='merchandiser_shop'),
+
+    # Items CRUD for Merchandisers
+    path('item/create/', views.ItemCreateView.as_view(), name='item-create'), # New URL for creating items
+    path('item/<int:pk>/edit/', views.ItemUpdateView.as_view(), name='item-edit'),   # New URL for editing items
 
     # # About page
     # path('about/', TemplateView.as_view(template_name='about.html'), name='about'),
@@ -38,7 +43,6 @@ urlpatterns = [
     path('signup/', views.SignUpView.as_view(), name='signup'),
     path('logout/', views.CustomLogoutView.as_view(), name='logout'),
     path('profile/', views.ProfileView.as_view(), name='profile'),
-    path('merchandiser_shop/', views.MerchandiserShopView.as_view(), name='merchandiser_shop'),
     path('merchandiser_signup/', views.MerchandiserSignupView.as_view(), name='merchandiser_signup'),
     #
     # # User profile/orders page

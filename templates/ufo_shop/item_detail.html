@@ -29,6 +29,12 @@
           <button class="btn btn-outline-secondary" type="button">
             {% trans "Add to Wishlist" %}
           </button>
+          {% if can_edit %}
+            <button class="btn btn-outline-primary" type="button"
+                    onclick="window.location='{% url 'item-edit' item.pk %}'">{% trans "Edit Item" %}
+            </button>
+          {% endif %}
+
         </div>
 
         <div class="mt-4">
@@ -47,23 +53,8 @@
           <h3>{% trans "Related Products" %}</h3>
         </div>
         {% for related_item in related_items.all %}
-          <div class="col-md-3 mb-4">
-            <div class="card">
-              {% if related_item.image %}
-                <img src="{{ related_item.image.url }}" class="card-img-top" alt="{{ related_item.name }}">
-              {% else %}
-                <div class="bg-light p-3 text-center">
-                  <p>{% trans "No image available" %}</p>
-                </div>
-              {% endif %}
-              <div class="card-body">
-                <h5 class="card-title">{{ related_item.name }}</h5>
-                <p class="card-text text-primary">${{ related_item.price }}</p>
-                <a href="{% url 'item-detail' related_item.id %}"
-                   class="btn btn-outline-primary btn-sm">{% trans "View Details" %}</a>
-              </div>
-            </div>
-          </div>
+          {% include "ufo_shop/item_card.html" with item=related_item %}
+
         {% endfor %}
       </div>
     {% endif %}

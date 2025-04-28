@@ -101,11 +101,20 @@ class ItemDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         context['related_items'] = Item.objects.filter(
             category__in=self.object.category.all(),
             is_active=True
-        ).exclude(id=self.object.id)[:4]
+        ).exclude(id=self.object.id)[:6]
+
         context['categories'] = Category.objects.all()
+
+        # Check if the current user can edit this item
+        can_edit = False
+        if self.request.user.is_authenticated:
+            if self.request.user.is_superuser or self.object.merchandiser == self.request.user:
+                can_edit = True
+        context['can_edit'] = can_edit
         return context
 
 
@@ -128,7 +137,7 @@ class MerchandiserShopView(LoginRequiredMixin, ListView):
 # View for creating a new item
 class ItemCreateView(LoginRequiredMixin, CreateView):
     model = Item
-    form_class = forms.ItemForm # Use the ItemForm
+    form_class = forms.ItemForm  # Use the ItemForm
     template_name = 'ufo_shop/item_form.html'
     success_url = reverse_lazy('merchandiser_shop')
 
@@ -139,7 +148,7 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Create New Item' # Add title for the template
+        context['form_title'] = 'Create New Item'
         return context
 
 
@@ -147,8 +156,8 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
 class ItemUpdateView(LoginRequiredMixin, UpdateView):
     model = Item
     fields = ['name', 'price', 'amount', 'location', 'short_description', 'description', 'category', 'is_active']
-    template_name = 'ufo_shop/item_form.html'  # Reuse the same template as create
-    success_url = reverse_lazy('merchandiser_shop') # Redirect after successful update
+    template_name = 'ufo_shop/item_form.html'
+    success_url = reverse_lazy('merchandiser_shop')
 
     def get_queryset(self):
         # Ensure users can only edit their own items

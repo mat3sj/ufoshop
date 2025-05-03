@@ -40,10 +40,7 @@ class PictureInlineForm(forms.ModelForm):
         else:
             self.fields['items'].queryset = Item.objects.none()
 
-
-class PictureInline(admin.TabularInline):
-    model = Picture.items.through
-    extra = 1  # adjust to your needs
+    ("Personal info", {"fields": ("first_name", "last_name", "phone")}),
 
     @admin.register(Item)
     class ItemAdmin(admin.ModelAdmin):

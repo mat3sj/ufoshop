@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from ufo_shop import forms
-from ufo_shop.models import Item, Category
+from ufo_shop.models import Item, Category, Picture
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
 from ufo_shop.utils import ufoshop_send_email
@@ -144,7 +144,18 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         # Assign the current logged-in user as the merchandiser
         form.instance.merchandiser = self.request.user
+        # Save the Item instance
+        self.object = form.save()
+
+        # Handle multiple image uploads
+        images = self.request.FILES.getlist('images') # 'images' is the name of the form field
+        for image_file in images:
+            Picture.objects.create(item=self.object, picture=image_file)
+            # The Picture model's save() method will handle thumbnails/squares
+
+        # Use the success_url defined on the class
         return super().form_valid(form)
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -166,7 +177,22 @@ class ItemUpdateView(LoginRequiredMixin, UpdateView):
             return queryset
         return queryset.filter(merchandiser=self.request.user)
 
+    def form_valid(self, form):
+        # Save the updated Item instance
+        self.object = form.save()
+
+        # Handle *new* multiple image uploads
+        images = self.request.FILES.getlist('images') # 'images' is the name of the form field
+        for image_file in images:
+            Picture.objects.create(item=self.object, picture=image_file)
+            # The Picture model's save() method will handle thumbnails/squares
+
+        # Use the success_url defined on the class
+        return super().form_valid(form)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Edit Item' # Add title for the template
+        context['form_title'] = 'Edit Item'
+        # You might want to pass existing pictures to the template for display/management
+        context['existing_pictures'] = self.object.pictures.all()
         return context

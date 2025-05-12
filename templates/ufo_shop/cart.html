@@ -34,7 +34,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td>{{ cart_item.item.price }} Kč</td>
+                        <td>{{ cart_item.item.price }} {% trans "CZK" %}</td>
                         <td style="width: 150px;">
                             <form method="post" action="{% url 'update_cart' %}">
                                 {% csrf_token %}
@@ -50,7 +50,7 @@
                                 </div>
                             </form>
                         </td>
-                        <td>{{ cart_item.item.price|floatformat:2 }} Kč</td>
+                        <td>{{ cart_item.item.price|floatformat:2 }} {% trans "CZK" %}</td>
                         <td>
                             <form method="post" action="{% url 'update_cart' %}">
                                 {% csrf_token %}
@@ -71,17 +71,17 @@
                 <tfoot>
                     <tr>
                         <td colspan="3" class="text-end"><strong>{% trans "Subtotal:" %}</strong></td>
-                        <td>{{ cart.subtotal|floatformat:2 }} Kč</td>
+                        <td>{{ cart.subtotal|floatformat:2 }} {% trans "CZK" %}</td>
                         <td></td>
                     </tr>
                     <tr>
                         <td colspan="3" class="text-end"><strong>{% trans "Shipping:" %}</strong></td>
-                        <td>{{ cart.shipping_cost|floatformat:2 }} Kč</td>
+                        <td>{{ cart.shipping_cost|floatformat:2 }} {% trans "CZK" %}</td>
                         <td></td>
                     </tr>
                     <tr>
                         <td colspan="3" class="text-end"><strong>{% trans "Total:" %}</strong></td>
-                        <td><strong>{{ cart.total|floatformat:2 }} Kč</strong></td>
+                        <td><strong>{{ cart.total|floatformat:2 }} {% trans "CZK" %}</strong></td>
                         <td></td>
                     </tr>
                 </tfoot>

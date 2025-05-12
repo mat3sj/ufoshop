@@ -57,23 +57,23 @@
                                 <tr>
                                     <td>{{ item.item.name }}</td>
                                     <td>{{ item.amount }}</td>
-                                    <td class="text-end">{{ item.item.price|floatformat:2 }} Kč</td>
-                                    <td class="text-end">{{ item.item.price|floatformat:2 }} Kč</td>
+                                    <td class="text-end">{{ item.item.price|floatformat:2 }} {% trans "CZK" %}</td>
+                                    <td class="text-end">{{ item.item.price|floatformat:2 }} {% trans "CZK" %}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                             <tfoot>
                                 <tr>
                                     <td colspan="3" class="text-end"><strong>{% trans "Subtotal" %}:</strong></td>
-                                    <td class="text-end">{{ order.subtotal|floatformat:2 }} Kč</td>
+                                    <td class="text-end">{{ order.subtotal|floatformat:2 }} {% trans "CZK" %}</td>
                                 </tr>
                                 <tr>
                                     <td colspan="3" class="text-end"><strong>{% trans "Shipping" %}:</strong></td>
-                                    <td class="text-end">{{ order.shipping_cost|floatformat:2 }} Kč</td>
+                                    <td class="text-end">{{ order.shipping_cost|floatformat:2 }} {% trans "CZK" %}</td>
                                 </tr>
                                 <tr>
                                     <td colspan="3" class="text-end"><strong>{% trans "Total" %}:</strong></td>
-                                    <td class="text-end"><strong>{{ order.total|floatformat:2 }} Kč</strong></td>
+                                    <td class="text-end"><strong>{{ order.total|floatformat:2 }} {% trans "CZK" %}</strong></td>
                                 </tr>
                             </tfoot>
                         </table>

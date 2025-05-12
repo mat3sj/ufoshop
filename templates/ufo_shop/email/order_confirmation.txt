@@ -1,4 +1,5 @@
 {% extends "ufo_shop/email/email_base.txt" %}
+{% load i18n %}
 
 {% block content %}
 Order Confirmation
@@ -15,12 +16,12 @@ Order Date: {{ order.created_at|date:"F j, Y" }}
 Items
 -----
 {% for item in items %}
-{{ item.item.name }} - {{ item.item.price|floatformat:2 }} Kč x {{ item.amount }} = {{ item.item.price|floatformat:2 }} Kč
+{{ item.item.name }} - {{ item.item.price|floatformat:2 }} {% trans "CZK" %} x {{ item.amount }} = {{ item.item.price|floatformat:2 }} {% trans "CZK" %}
 {% endfor %}
 
-Subtotal: {{ order.subtotal|floatformat:2 }} Kč
-Shipping: {{ order.shipping_cost|floatformat:2 }} Kč
-Total: {{ order.total|floatformat:2 }} Kč
+Subtotal: {{ order.subtotal|floatformat:2 }} {% trans "CZK" %}
+Shipping: {{ order.shipping_cost|floatformat:2 }} {% trans "CZK" %}
+Total: {{ order.total|floatformat:2 }} {% trans "CZK" %}
 
 View Order Details: {{ order_url }}
 

@@ -37,7 +37,7 @@
                                 <span class="badge bg-danger">{% trans "Cancelled" %}</span>
                             {% endif %}
                         </td>
-                        <td>{{ order.total|floatformat:2 }} Kč</td>
+                        <td>{{ order.total|floatformat:2 }} {% trans "CZK" %}</td>
                         <td>
                             <a href="{% url 'order_confirmation' order.id %}" class="btn btn-sm btn-outline-primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">

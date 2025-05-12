@@ -110,7 +110,9 @@ class Picture(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name="Uploaded by"
+        verbose_name="Uploaded by",
+        blank=True,
+        null=True,
     )
     picture = models.ImageField(
         "Original Image",
@@ -139,99 +141,88 @@ class Picture(models.Model):
             return f"Picture for {self.item.name} ({os.path.basename(self.picture.name)})"
         return os.path.basename(self.picture.name)
 
-    def save(self, *args, **kwargs):
-        # Check if the picture field has actually changed or is new
-        generate_derivatives = False
+    def _check_if_derivatives_needed(self):
         if self.pk:
             try:
                 old_instance = Picture.objects.get(pk=self.pk)
-                if old_instance.picture != self.picture:
-                    generate_derivatives = True
+                return old_instance.picture != self.picture
             except Picture.DoesNotExist:
-                generate_derivatives = True # Should not happen often in save context, but safe
-        else: # New instance
-             generate_derivatives = True
+                return True  # Should not happen often in save context, but safe
+        return True  # New instance
 
-        # Save the original picture first
-        # We need to call super().save() once to get the file saved and self.pk assigned
-        # But if we don't change derivatives later, we only save once.
+    def generate_square_image(self):
+        img = PilImage.open(self.picture)
+        square_img = img.copy()
+        width, height = square_img.size
+        size = min(width, height)
+
+        # Crop to square from center
+        left = (width - size) // 2
+        top = (height - size) // 2
+        right = left + size
+        bottom = top + size
+        square_img = square_img.crop((left, top, right, bottom))
+
+        # Resize the square crop to the target size
+        square_img = square_img.resize((SQUARE_IMAGE_SIZE, SQUARE_IMAGE_SIZE), PilImage.Resampling.LANCZOS)
+
+        # Save square image to buffer
+        square_io = BytesIO()
+        img_name = os.path.basename(self.picture.name)
+        base_name, ext = os.path.splitext(img_name)
+        square_img.save(square_io, format=img.format, quality=90)
+        square_filename = f"{base_name}_sq{SQUARE_IMAGE_SIZE}{ext}"
+        self.square_image.save(square_filename, ContentFile(square_io.getvalue()), save=False)
+
+        return square_img
+
+    def generate_thumbnail(self):
+        img = PilImage.open(self.picture)
+        img_name = os.path.basename(self.picture.name)
+        base_name, ext = os.path.splitext(img_name)
+
+        thumb_size = (THUMBNAIL_SIZE, THUMBNAIL_SIZE)
+        thumb_img = img.copy()
+        thumb_img.thumbnail(thumb_size, PilImage.Resampling.LANCZOS)
+
+        # Save thumbnail to buffer  
+        thumb_io = BytesIO()
+        thumb_img.save(thumb_io, format=img.format, quality=85)
+        thumb_filename = f"{base_name}_thumb{ext}"
+        self.thumbnail.save(thumb_filename, ContentFile(thumb_io.getvalue()), save=False)
+
+    def save(self, *args, **kwargs):
+        generate_derivatives = self._check_if_derivatives_needed()
+
         save_needed_after_derivatives = False
         if generate_derivatives and self.picture:
-             # Temporarily skip derivative generation on first save if it's a new instance
-             # This avoids issues if storage backend needs PK or final path first
-             temp_skip_derivatives = not self.pk
-             if temp_skip_derivatives:
-                 # Ensure fields are None initially if skipped
-                 self.thumbnail = None
-                 self.square_image = None
-             super().save(*args, **kwargs) # Save the original image (and model instance if new)
-             save_needed_after_derivatives = True # Mark that we might need a second save
-        elif not generate_derivatives:
-             super().save(*args, **kwargs) # Just save normally if picture hasn't changed
-
-        # Now, generate derivatives if needed and if the original picture exists
-        if generate_derivatives and self.picture and not temp_skip_derivatives:
-            try:
-                img = PilImage.open(self.picture)
-                img_format = img.format # Store format (JPEG, PNG, etc.)
-                img_name = os.path.basename(self.picture.name)
-                base_name, ext = os.path.splitext(img_name)
-
-
-                # --- Generate Square Image (e.g., 500x500 crop) ---
-                square_img = img.copy()
-                width, height = square_img.size
-                size = min(width, height)
-
-                # Crop to square from center
-                left = (width - size) // 2
-                top = (height - size) // 2
-                right = left + size
-                bottom = top + size
-                square_img = square_img.crop((left, top, right, bottom))
-
-                # Resize the square crop to the target size
-                square_img = square_img.resize((SQUARE_IMAGE_SIZE, SQUARE_IMAGE_SIZE), PilImage.Resampling.LANCZOS)
-
-                # Save square image to buffer
-                square_io = BytesIO()
-                square_img.save(square_io, format=img_format, quality=90)
-                square_filename = f"{base_name}_sq{SQUARE_IMAGE_SIZE}{ext}"
-                self.square_image.save(square_filename, ContentFile(square_io.getvalue()), save=False) # save=False here
-
-                # --- Generate Thumbnail (150x150 crop/resize) ---
-                thumb_size = (THUMBNAIL_SIZE, THUMBNAIL_SIZE)
-                thumb_img = square_img.copy()
-                thumb_img.thumbnail(thumb_size, PilImage.Resampling.LANCZOS) # Resizes maintaining aspect ratio
-
-                # Save thumbnail to buffer
-                thumb_io = BytesIO()
-                thumb_img.save(thumb_io, format=img_format, quality=85)
-                thumb_filename = f"{base_name}_thumb{ext}"
-                self.thumbnail.save(thumb_filename, ContentFile(thumb_io.getvalue()), save=False) # save=False here
-
-                # Mark that we definitely need to save again
-                save_needed_after_derivatives = True
-
-            except Exception as e:
-                print(f"Error processing image {self.picture.name}: {e}")
-                # Decide how to handle errors: clear derivatives, log, etc.
+            temp_skip_derivatives = not self.pk
+            if temp_skip_derivatives:
                 self.thumbnail = None
                 self.square_image = None
-                save_needed_after_derivatives = True # Still save to clear fields potentially
+            super().save(*args, **kwargs)
+            save_needed_after_derivatives = True
+        elif not generate_derivatives:
+            super().save(*args, **kwargs)
 
-        # Perform the second save ONLY if derivatives were generated or need clearing
+        if generate_derivatives and self.picture and not temp_skip_derivatives:
+            try:
+                self.generate_square_image()
+                self.generate_thumbnail()
+                save_needed_after_derivatives = True
+            except Exception as e:
+                print(f"Error processing image {self.picture.name}: {e}")
+                self.thumbnail = None
+                self.square_image = None
+                save_needed_after_derivatives = True
+
         if save_needed_after_derivatives:
-             # Use update_fields to avoid recursion and only save the necessary fields
-             update_fields = ['thumbnail', 'square_image']
-             # Include original picture field if it was processed in this pass
-             if generate_derivatives and not temp_skip_derivatives:
-                  update_fields.append('picture') # This might be redundant if first save handled it, but safe
+            update_fields = ['thumbnail', 'square_image']
+            if generate_derivatives and not temp_skip_derivatives:
+                update_fields.append('picture')
 
-             # Filter out fields that are None if not intended
-             update_fields = [field for field in update_fields if getattr(self, field) is not None or field == 'picture']
+            update_fields = [field for field in update_fields if getattr(self, field) is not None or field == 'picture']
 
-             if self.pk and update_fields: # Ensure we have a PK and fields to update
-                 kwargs['update_fields'] = update_fields
-                 super().save(*args, **kwargs) # Save again with updated fields
-
+            if self.pk and update_fields:
+                kwargs['update_fields'] = update_fields
+                super().save(*args, **kwargs)

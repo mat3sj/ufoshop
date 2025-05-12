@@ -1,0 +1,56 @@
+{% extends "ufo_shop/email/email_base.html" %}
+
+{% block title %}Order Confirmation - UFO Shop{% endblock %}
+
+{% block content %}
+  <div class="email-content">
+    <h1>Order Confirmation</h1>
+
+    <div class="order-details">
+      <p>Dear {{ user.email }},</p>
+      <p>Thank you for your order! We're excited to confirm that your order has been received and is being processed.</p>
+      
+      <h2>Order Details</h2>
+      <p><strong>Order Number:</strong> {{ order.number }}</p>
+      <p><strong>Order Date:</strong> {{ order.date }}</p>
+      
+      <h3>Items</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <thead>
+          <tr style="background-color: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+            <th style="padding: 10px; text-align: left;">Item</th>
+            <th style="padding: 10px; text-align: right;">Price</th>
+            <th style="padding: 10px; text-align: center;">Quantity</th>
+            <th style="padding: 10px; text-align: right;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in order.items %}
+          <tr style="border-bottom: 1px solid #dee2e6;">
+            <td style="padding: 10px;">{{ item.name }}</td>
+            <td style="padding: 10px; text-align: right;">{{ item.price }}</td>
+            <td style="padding: 10px; text-align: center;">{{ item.quantity }}</td>
+            <td style="padding: 10px; text-align: right;">{{ item.total }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
+            <td style="padding: 10px; text-align: right;"><strong>{{ order.total }}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="cta-buttons">
+      <a href="{{ order_url }}" class="btn">View Order Details</a>
+    </div>
+
+    <div class="footer-info">
+      <p>If you have any questions about your order, please contact our support team.</p>
+      <p>Thank you for shopping with us!</p>
+      <p>Best regards,<br>The UFO Shop Team</p>
+    </div>
+  </div>
+{% endblock %}

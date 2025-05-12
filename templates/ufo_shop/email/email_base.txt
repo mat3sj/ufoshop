@@ -1,0 +1,7 @@
+{% block content %}
+{% endblock %}
+
+--
+UFO Shop - Your Ultimate Flying Objects Store
+Contact us: support@ufoshop.com
+© {% now "Y" %} UFO Shop. All rights reserved.

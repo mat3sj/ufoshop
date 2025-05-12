@@ -1,0 +1,31 @@
+{% extends "ufo_shop/email/email_base.txt" %}
+
+{% block content %}
+Order Confirmation
+
+Dear {{ user.email }},
+
+Thank you for your order! We're excited to confirm that your order has been received and is being processed.
+
+Order Details
+-------------
+Order Number: {{ order.number }}
+Order Date: {{ order.date }}
+
+Items
+-----
+{% for item in order.items %}
+{{ item.name }} - {{ item.price }} x {{ item.quantity }} = {{ item.total }}
+{% endfor %}
+
+Total: {{ order.total }}
+
+View Order Details: {{ order_url }}
+
+If you have any questions about your order, please contact our support team.
+
+Thank you for shopping with us!
+
+Best regards,
+The UFO Shop Team
+{% endblock %}

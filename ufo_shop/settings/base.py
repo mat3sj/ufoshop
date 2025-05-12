@@ -151,13 +151,24 @@ LOGIN_REDIRECT_URL = '/'  # Redirect to the home page
 #############################
 # Email Settings
 #############################
+# Email backend configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # Your Email Host
+
+# Gmail SMTP configuration
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-DEFAULT_FROM_EMAIL = ''
+
+# Gmail account credentials
+# To use Gmail SMTP, you need to:
+# 1. Enable 2-Step Verification for your Google account
+# 2. Generate an App Password: https://myaccount.google.com/apppasswords
+# 3. Use that App Password here instead of your regular password
+EMAIL_HOST_USER = ''  # Your Gmail address (e.g., 'your.email@gmail.com')
+EMAIL_HOST_PASSWORD = ''  # Your Gmail App Password
+
+# Default sender email address
+DEFAULT_FROM_EMAIL = ''  # Your sender email (e.g., 'UFO Shop <noreply@ufoshop.com>')
 
 #############################
 # Crispy forms

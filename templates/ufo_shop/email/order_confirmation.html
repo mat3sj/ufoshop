@@ -28,24 +28,24 @@
           {% for item in items %}
           <tr style="border-bottom: 1px solid #dee2e6;">
             <td style="padding: 10px;">{{ item.item.name }}</td>
-            <td style="padding: 10px; text-align: right;">${{ item.item.price|floatformat:2 }}</td>
+            <td style="padding: 10px; text-align: right;">{{ item.item.price|floatformat:2 }} Kč</td>
             <td style="padding: 10px; text-align: center;">{{ item.amount }}</td>
-            <td style="padding: 10px; text-align: right;">${{ item.item.price|floatformat:2 }}</td>
+            <td style="padding: 10px; text-align: right;">{{ item.item.price|floatformat:2 }} Kč</td>
           </tr>
           {% endfor %}
         </tbody>
         <tfoot>
           <tr>
             <td colspan="3" style="padding: 10px; text-align: right;"><strong>Subtotal:</strong></td>
-            <td style="padding: 10px; text-align: right;"><strong>${{ order.subtotal|floatformat:2 }}</strong></td>
+            <td style="padding: 10px; text-align: right;"><strong>{{ order.subtotal|floatformat:2 }} Kč</strong></td>
           </tr>
           <tr>
             <td colspan="3" style="padding: 10px; text-align: right;"><strong>Shipping:</strong></td>
-            <td style="padding: 10px; text-align: right;"><strong>${{ order.shipping_cost|floatformat:2 }}</strong></td>
+            <td style="padding: 10px; text-align: right;"><strong>{{ order.shipping_cost|floatformat:2 }} Kč</strong></td>
           </tr>
           <tr>
             <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
-            <td style="padding: 10px; text-align: right;"><strong>${{ order.total|floatformat:2 }}</strong></td>
+            <td style="padding: 10px; text-align: right;"><strong>{{ order.total|floatformat:2 }} Kč</strong></td>
           </tr>
         </tfoot>
       </table>

@@ -15,12 +15,12 @@ Order Date: {{ order.created_at|date:"F j, Y" }}
 Items
 -----
 {% for item in items %}
-{{ item.item.name }} - ${{ item.item.price|floatformat:2 }} x {{ item.amount }} = ${{ item.item.price|floatformat:2 }}
+{{ item.item.name }} - {{ item.item.price|floatformat:2 }} Kč x {{ item.amount }} = {{ item.item.price|floatformat:2 }} Kč
 {% endfor %}
 
-Subtotal: ${{ order.subtotal|floatformat:2 }}
-Shipping: ${{ order.shipping_cost|floatformat:2 }}
-Total: ${{ order.total|floatformat:2 }}
+Subtotal: {{ order.subtotal|floatformat:2 }} Kč
+Shipping: {{ order.shipping_cost|floatformat:2 }} Kč
+Total: {{ order.total|floatformat:2 }} Kč
 
 View Order Details: {{ order_url }}
 

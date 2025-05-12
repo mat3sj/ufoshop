@@ -6,7 +6,7 @@
 {% block content %}
 <div class="container">
     <h1 class="mb-4">{% trans "My Orders" %}</h1>
-    
+
     {% if orders %}
         <div class="table-responsive">
             <table class="table table-hover">
@@ -37,7 +37,7 @@
                                 <span class="badge bg-danger">{% trans "Cancelled" %}</span>
                             {% endif %}
                         </td>
-                        <td>${{ order.total|floatformat:2 }}</td>
+                        <td>{{ order.total|floatformat:2 }} Kč</td>
                         <td>
                             <a href="{% url 'order_confirmation' order.id %}" class="btn btn-sm btn-outline-primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
@@ -58,7 +58,7 @@
             <a href="{% url 'shop' %}" class="btn btn-primary mt-3">{% trans "Start Shopping" %}</a>
         </div>
     {% endif %}
-    
+
     <div class="mt-4">
         <a href="{% url 'shop' %}" class="btn btn-outline-secondary">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">

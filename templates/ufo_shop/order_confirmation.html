@@ -22,7 +22,7 @@
                         <p>{% trans "Your order has been received and is being processed." %}</p>
                         <p>{% trans "A confirmation email has been sent to" %} <strong>{{ order.contact_email }}</strong></p>
                     </div>
-                    
+
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <h6>{% trans "Order Information" %}</h6>
@@ -40,7 +40,7 @@
                             <p><strong>{% trans "Contact" %}:</strong> {{ order.contact_phone }}</p>
                         </div>
                     </div>
-                    
+
                     <h6>{% trans "Order Summary" %}</h6>
                     <div class="table-responsive">
                         <table class="table">
@@ -57,23 +57,23 @@
                                 <tr>
                                     <td>{{ item.item.name }}</td>
                                     <td>{{ item.amount }}</td>
-                                    <td class="text-end">${{ item.item.price|floatformat:2 }}</td>
-                                    <td class="text-end">${{ item.item.price|floatformat:2 }}</td>
+                                    <td class="text-end">{{ item.item.price|floatformat:2 }} Kč</td>
+                                    <td class="text-end">{{ item.item.price|floatformat:2 }} Kč</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                             <tfoot>
                                 <tr>
                                     <td colspan="3" class="text-end"><strong>{% trans "Subtotal" %}:</strong></td>
-                                    <td class="text-end">${{ order.subtotal|floatformat:2 }}</td>
+                                    <td class="text-end">{{ order.subtotal|floatformat:2 }} Kč</td>
                                 </tr>
                                 <tr>
                                     <td colspan="3" class="text-end"><strong>{% trans "Shipping" %}:</strong></td>
-                                    <td class="text-end">${{ order.shipping_cost|floatformat:2 }}</td>
+                                    <td class="text-end">{{ order.shipping_cost|floatformat:2 }} Kč</td>
                                 </tr>
                                 <tr>
                                     <td colspan="3" class="text-end"><strong>{% trans "Total" %}:</strong></td>
-                                    <td class="text-end"><strong>${{ order.total|floatformat:2 }}</strong></td>
+                                    <td class="text-end"><strong>{{ order.total|floatformat:2 }} Kč</strong></td>
                                 </tr>
                             </tfoot>
                         </table>

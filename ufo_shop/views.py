@@ -1,15 +1,18 @@
 from django.template.loader import render_to_string
 from django.views import View
 # Import UpdateView
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, FormView
 from django.contrib.auth import get_user_model
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from django.utils import timezone
+from django.http import HttpResponseRedirect
 
 from ufo_shop import forms
-from ufo_shop.models import Item, Category, Picture
+from ufo_shop.models import Item, Category, Picture, Order, OrderItem
 from django.contrib.auth.views import LoginView, LogoutView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from ufo_shop.utils import ufoshop_send_email
 
 
@@ -115,6 +118,11 @@ class ItemDetailView(DetailView):
             if self.request.user.is_superuser or self.object.merchandiser == self.request.user:
                 can_edit = True
         context['can_edit'] = can_edit
+
+        # Add to cart form
+        add_to_cart_form = forms.AddToCartForm(initial={'item_id': self.object.id})
+        context['add_to_cart_form'] = add_to_cart_form
+
         return context
 
 
@@ -196,3 +204,219 @@ class ItemUpdateView(LoginRequiredMixin, UpdateView):
         # You might want to pass existing pictures to the template for display/management
         context['existing_pictures'] = self.object.pictures.all()
         return context
+
+
+# Cart and Checkout Views
+class CartView(LoginRequiredMixin, View):
+    """View to display the current cart"""
+
+    def get(self, request):
+        # Get or create an order with status IN_CART for the current user
+        cart, created = Order.objects.get_or_create(
+            user=request.user,
+            status=Order.Status.IN_CART
+        )
+
+        # Get all items in the cart
+        cart_items = cart.orderitem_set.all().select_related('item')
+
+        # Create forms for updating quantities
+        update_forms = []
+        for cart_item in cart_items:
+            form = forms.CartUpdateForm(initial={
+                'quantity': cart_item.amount,
+                'item_id': cart_item.item.id
+            })
+            update_forms.append((cart_item, form))
+
+        # Calculate totals
+        cart.calculate_totals()
+        cart.save()
+
+        return render(request, 'ufo_shop/cart.html', {
+            'cart': cart,
+            'cart_items': update_forms,
+        })
+
+
+class AddToCartView(LoginRequiredMixin, FormView):
+    """View to add an item to the cart"""
+    form_class = forms.AddToCartForm
+
+    def form_valid(self, form):
+        item_id = form.cleaned_data['item_id']
+        quantity = form.cleaned_data['quantity']
+
+        # Get the item
+        item = get_object_or_404(Item, id=item_id)
+
+        # Get or create an order with status IN_CART for the current user
+        cart, created = Order.objects.get_or_create(
+            user=self.request.user,
+            status=Order.Status.IN_CART
+        )
+
+        # Check if the item is already in the cart
+        order_item, created = OrderItem.objects.get_or_create(
+            order=cart,
+            item=item,
+            defaults={'amount': quantity}
+        )
+
+        # If the item is already in the cart, update the quantity
+        if not created:
+            order_item.amount += quantity
+            order_item.save()
+
+        messages.success(self.request, f'{item.name} added to your cart.')
+
+        # Redirect to the referring page or the cart
+        next_url = self.request.POST.get('next', reverse('cart'))
+        return HttpResponseRedirect(next_url)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Error adding item to cart. Please try again.')
+        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER', reverse('shop')))
+
+
+class UpdateCartView(LoginRequiredMixin, FormView):
+    """View to update item quantities in the cart"""
+    form_class = forms.CartUpdateForm
+
+    def form_valid(self, form):
+        item_id = form.cleaned_data['item_id']
+        quantity = form.cleaned_data['quantity']
+
+        # Get the cart
+        cart = get_object_or_404(Order, user=self.request.user, status=Order.Status.IN_CART)
+
+        # Get the order item
+        order_item = get_object_or_404(OrderItem, order=cart, item_id=item_id)
+
+        # Update the quantity or remove if quantity is 0
+        if quantity > 0:
+            order_item.amount = quantity
+            order_item.save()
+            messages.success(self.request, 'Cart updated.')
+        else:
+            order_item.delete()
+            messages.success(self.request, 'Item removed from cart.')
+
+        # Recalculate totals
+        cart.calculate_totals()
+        cart.save()
+
+        return redirect('cart')
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Error updating cart. Please try again.')
+        return redirect('cart')
+
+
+class CheckoutView(LoginRequiredMixin, FormView):
+    """View to collect shipping and payment information"""
+    form_class = forms.CheckoutForm
+    template_name = 'ufo_shop/checkout.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        # Check if the cart is empty
+        cart = self.get_cart()
+        if not cart or cart.orderitem_set.count() == 0:
+            messages.warning(request, 'Your cart is empty. Please add items before checkout.')
+            return redirect('shop')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_cart(self):
+        try:
+            return Order.objects.get(user=self.request.user, status=Order.Status.IN_CART)
+        except Order.DoesNotExist:
+            return None
+
+    def get_initial(self):
+        # Pre-fill the form with user information
+        user = self.request.user
+        return {
+            'contact_email': user.email,
+            'contact_phone': user.phone,
+        }
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cart = self.get_cart()
+        cart.calculate_totals()
+        context['cart'] = cart
+        context['cart_items'] = cart.orderitem_set.all().select_related('item')
+        return context
+
+    def form_valid(self, form):
+        cart = self.get_cart()
+
+        # Update the cart with shipping and payment information
+        for field in form.cleaned_data:
+            setattr(cart, field, form.cleaned_data[field])
+
+        # Update the status to ORDERED
+        cart.status = Order.Status.ORDERED
+        cart.calculate_totals()
+        cart.save()
+
+        # Send order confirmation email
+        self.send_order_confirmation(cart)
+
+        # Redirect to order confirmation page
+        return redirect('order_confirmation', pk=cart.id)
+
+    def send_order_confirmation(self, order):
+        """Send order confirmation email"""
+        items = order.orderitem_set.all().select_related('item')
+
+        # Build the order URL
+        order_url = self.request.build_absolute_uri(
+            reverse('order_confirmation', kwargs={'pk': order.id})
+        )
+
+        # Create context for email template
+        context = {
+            'order': order,
+            'items': items,
+            'user': self.request.user,
+            'order_url': order_url,
+        }
+
+        ufoshop_send_email(
+            recipient_list=[order.contact_email],
+            subject='Your Order Confirmation',
+            html_message=render_to_string('ufo_shop/email/order_confirmation.html', context),
+            plain_message=render_to_string('ufo_shop/email/order_confirmation.txt', context),
+        )
+
+
+class OrderConfirmationView(LoginRequiredMixin, DetailView):
+    """View to display order confirmation after checkout"""
+    model = Order
+    template_name = 'ufo_shop/order_confirmation.html'
+    context_object_name = 'order'
+
+    def get_queryset(self):
+        # Ensure users can only view their own orders
+        return Order.objects.filter(user=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['items'] = self.object.orderitem_set.all().select_related('item')
+        return context
+
+
+class OrderHistoryView(LoginRequiredMixin, ListView):
+    """View to display order history"""
+    model = Order
+    template_name = 'ufo_shop/order_history.html'
+    context_object_name = 'orders'
+
+    def get_queryset(self):
+        # Only show orders that are not in cart
+        return Order.objects.filter(
+            user=self.request.user
+        ).exclude(
+            status=Order.Status.IN_CART
+        ).order_by('-created_at')

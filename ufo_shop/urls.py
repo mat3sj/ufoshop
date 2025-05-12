@@ -41,6 +41,14 @@ urlpatterns = [
     path('item/create/', views.ItemCreateView.as_view(), name='item-create'), # New URL for creating items
     path('item/<int:pk>/edit/', views.ItemUpdateView.as_view(), name='item-edit'),   # New URL for editing items
 
+    # Cart and Checkout
+    path('cart/', views.CartView.as_view(), name='cart'),
+    path('cart/add/', views.AddToCartView.as_view(), name='add_to_cart'),
+    path('cart/update/', views.UpdateCartView.as_view(), name='update_cart'),
+    path('checkout/', views.CheckoutView.as_view(), name='checkout'),
+    path('order/<int:pk>/confirmation/', views.OrderConfirmationView.as_view(), name='order_confirmation'),
+    path('orders/', views.OrderHistoryView.as_view(), name='orders'),
+
     # # About page
     # path('about/', TemplateView.as_view(template_name='about.html'), name='about'),
     #
@@ -50,9 +58,6 @@ urlpatterns = [
     path('accounts/logout/', views.CustomLogoutView.as_view(), name='logout'),
     path('accounts/profile/', views.ProfileView.as_view(), name='profile'),
     path('accounts/merchandiser_signup/', views.MerchandiserSignupView.as_view(), name='merchandiser_signup'),
-    #
-    # # User profile/orders page
-    # path('orders/', TemplateView.as_view(template_name='orders.html'), name='orders'),
     #
     # # Privacy policy and terms of service
     # path('privacy-policy/', TemplateView.as_view(template_name='privacy_policy.html'), name='privacy_policy'),

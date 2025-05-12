@@ -1,8 +1,9 @@
 {% extends "ufo_shop/base.html" %}
 {% load i18n %}
+{% load crispy_forms_tags %}
 
 {% block title %}
-  {% trans "Product Details" %}
+  {{ item.name }} | {% trans "Product Details" %}
 {% endblock %}
 
 {% block content %}
@@ -23,18 +24,33 @@
         <p class="h3 text-primary mb-4">${{ item.price }}</p>
 
         <div class="d-grid gap-2">
-          <button class="btn btn-primary" type="button">
-            {% trans "Add to Cart" %}
-          </button>
-          <button class="btn btn-outline-secondary" type="button">
-            {% trans "Add to Wishlist" %}
-          </button>
-          {% if can_edit %}
-            <button class="btn btn-outline-primary" type="button"
-                    onclick="window.location='{% url 'item-edit' item.pk %}'">{% trans "Edit Item" %}
-            </button>
+          {% if user.is_authenticated %}
+            <form method="post" action="{% url 'add_to_cart' %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.path }}">
+              {{ add_to_cart_form.item_id }}
+              <div class="input-group mb-3">
+                {{ add_to_cart_form.quantity }}
+                <button class="btn btn-success" type="submit">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart-plus" viewBox="0 0 16 16">
+                    <path d="M9 5.5a.5.5 0 0 0-1 0V7H6.5a.5.5 0 0 0 0 1H8v1.5a.5.5 0 0 0 1 0V8h1.5a.5.5 0 0 0 0-1H9V5.5z"/>
+                    <path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1H.5zm3.915 10L3.102 4h10.796l-1.313 7h-8.17zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                  </svg>
+                  {% trans "Add to Cart" %}
+                </button>
+              </div>
+            </form>
+          {% else %}
+            <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary">
+              {% trans "Login to Add to Cart" %}
+            </a>
           {% endif %}
 
+          {% if can_edit %}
+            <a href="{% url 'item-edit' item.pk %}" class="btn btn-outline-primary">
+              {% trans "Edit Item" %}
+            </a>
+          {% endif %}
         </div>
 
         <div class="mt-4">

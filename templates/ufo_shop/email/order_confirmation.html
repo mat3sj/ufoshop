@@ -9,11 +9,11 @@
     <div class="order-details">
       <p>Dear {{ user.email }},</p>
       <p>Thank you for your order! We're excited to confirm that your order has been received and is being processed.</p>
-      
+
       <h2>Order Details</h2>
-      <p><strong>Order Number:</strong> {{ order.number }}</p>
-      <p><strong>Order Date:</strong> {{ order.date }}</p>
-      
+      <p><strong>Order Number:</strong> #{{ order.id }}</p>
+      <p><strong>Order Date:</strong> {{ order.created_at|date:"F j, Y" }}</p>
+
       <h3>Items</h3>
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
         <thead>
@@ -25,19 +25,27 @@
           </tr>
         </thead>
         <tbody>
-          {% for item in order.items %}
+          {% for item in items %}
           <tr style="border-bottom: 1px solid #dee2e6;">
-            <td style="padding: 10px;">{{ item.name }}</td>
-            <td style="padding: 10px; text-align: right;">{{ item.price }}</td>
-            <td style="padding: 10px; text-align: center;">{{ item.quantity }}</td>
-            <td style="padding: 10px; text-align: right;">{{ item.total }}</td>
+            <td style="padding: 10px;">{{ item.item.name }}</td>
+            <td style="padding: 10px; text-align: right;">${{ item.item.price|floatformat:2 }}</td>
+            <td style="padding: 10px; text-align: center;">{{ item.amount }}</td>
+            <td style="padding: 10px; text-align: right;">${{ item.item.price|floatformat:2 }}</td>
           </tr>
           {% endfor %}
         </tbody>
         <tfoot>
           <tr>
+            <td colspan="3" style="padding: 10px; text-align: right;"><strong>Subtotal:</strong></td>
+            <td style="padding: 10px; text-align: right;"><strong>${{ order.subtotal|floatformat:2 }}</strong></td>
+          </tr>
+          <tr>
+            <td colspan="3" style="padding: 10px; text-align: right;"><strong>Shipping:</strong></td>
+            <td style="padding: 10px; text-align: right;"><strong>${{ order.shipping_cost|floatformat:2 }}</strong></td>
+          </tr>
+          <tr>
             <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
-            <td style="padding: 10px; text-align: right;"><strong>{{ order.total }}</strong></td>
+            <td style="padding: 10px; text-align: right;"><strong>${{ order.total|floatformat:2 }}</strong></td>
           </tr>
         </tfoot>
       </table>

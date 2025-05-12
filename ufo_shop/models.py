@@ -70,12 +70,40 @@ class Order(models.Model):
     class Status(models.IntegerChoices):
         IN_CART = 1, 'In Cart'
         ORDERED = 2, 'Ordered'
-        FULFILLED = 3, 'Fulfilled'
+        PAID = 3, 'Paid'
+        SHIPPED = 4, 'Shipped'
+        FULFILLED = 5, 'Fulfilled'
+        CANCELLED = 6, 'Cancelled'
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Customer")
     status = models.IntegerField("Status", choices=Status.choices, default=Status.IN_CART)
+
+    # Shipping information
+    shipping_address = models.TextField("Shipping Address", blank=True, null=True)
+    shipping_city = models.CharField("City", max_length=100, blank=True, null=True)
+    shipping_state = models.CharField("State/Province", max_length=100, blank=True, null=True)
+    shipping_country = models.CharField("Country", max_length=100, blank=True, null=True)
+    shipping_zip = models.CharField("ZIP/Postal Code", max_length=20, blank=True, null=True)
+
+    # Contact information
+    contact_email = models.EmailField("Contact Email", blank=True, null=True)
+    contact_phone = models.CharField("Contact Phone", max_length=20, blank=True, null=True)
+
+    # Payment information
+    payment_method = models.CharField("Payment Method", max_length=50, blank=True, null=True)
+    payment_id = models.CharField("Payment ID", max_length=100, blank=True, null=True)
+
+    # Order details
+    subtotal = models.DecimalField("Subtotal", max_digits=10, decimal_places=2, default=0)
+    shipping_cost = models.DecimalField("Shipping Cost", max_digits=10, decimal_places=2, default=0)
+    total = models.DecimalField("Total", max_digits=10, decimal_places=2, default=0)
+
+    # Timestamps
     created_at = models.DateTimeField("Created At", auto_now_add=True)
     updated_at = models.DateTimeField("Updated At", auto_now=True)
+    paid_at = models.DateTimeField("Paid At", blank=True, null=True)
+    shipped_at = models.DateTimeField("Shipped At", blank=True, null=True)
+    fulfilled_at = models.DateTimeField("Fulfilled At", blank=True, null=True)
 
     class Meta:
         verbose_name = "Order"
@@ -83,6 +111,15 @@ class Order(models.Model):
 
     def __str__(self):
         return f'{self.user.email} - {self.id} - {self.status}'
+
+    def calculate_totals(self):
+        """Calculate subtotal and total for the order"""
+        order_items = self.orderitem_set.all()
+        self.subtotal = sum(item.item.price * item.amount for item in order_items)
+        # For now, shipping is free
+        self.shipping_cost = 0
+        self.total = self.subtotal + self.shipping_cost
+        return self.total
 
 
 class OrderItem(models.Model):

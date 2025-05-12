@@ -1,0 +1,71 @@
+{% extends 'ufo_shop/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "My Orders" %} | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">{% trans "My Orders" %}</h1>
+    
+    {% if orders %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>{% trans "Order #" %}</th>
+                        <th>{% trans "Date" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Total" %}</th>
+                        <th>{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>#{{ order.id }}</td>
+                        <td>{{ order.created_at|date:"M d, Y" }}</td>
+                        <td>
+                            {% if order.status == order.Status.ORDERED %}
+                                <span class="badge bg-primary">{% trans "Ordered" %}</span>
+                            {% elif order.status == order.Status.PAID %}
+                                <span class="badge bg-info">{% trans "Paid" %}</span>
+                            {% elif order.status == order.Status.SHIPPED %}
+                                <span class="badge bg-warning">{% trans "Shipped" %}</span>
+                            {% elif order.status == order.Status.FULFILLED %}
+                                <span class="badge bg-success">{% trans "Fulfilled" %}</span>
+                            {% elif order.status == order.Status.CANCELLED %}
+                                <span class="badge bg-danger">{% trans "Cancelled" %}</span>
+                            {% endif %}
+                        </td>
+                        <td>${{ order.total|floatformat:2 }}</td>
+                        <td>
+                            <a href="{% url 'order_confirmation' order.id %}" class="btn btn-sm btn-outline-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                    <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                    <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                                </svg>
+                                {% trans "View" %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <p>{% trans "You don't have any orders yet." %}</p>
+            <a href="{% url 'shop' %}" class="btn btn-primary mt-3">{% trans "Start Shopping" %}</a>
+        </div>
+    {% endif %}
+    
+    <div class="mt-4">
+        <a href="{% url 'shop' %}" class="btn btn-outline-secondary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+            </svg>
+            {% trans "Continue Shopping" %}
+        </a>
+    </div>
+</div>
+{% endblock %}

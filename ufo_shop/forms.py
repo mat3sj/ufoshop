@@ -6,10 +6,18 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, Submit, Row, Column, Div
+from crispy_forms.layout import Layout, Fieldset, Submit, Row, Column, Div, HTML
 
 from ufo_shop import settings
-from ufo_shop.models import Item
+from ufo_shop.models import Item, Order, OrderItem
+
+# Payment method choices
+PAYMENT_METHODS = [
+    ('credit_card', 'Credit Card'),
+    ('bank_transfer', 'Bank Transfer'),
+    ('paypal', 'PayPal'),
+    ('cash_on_delivery', 'Cash on Delivery'),
+]
 
 
 class EmailAuthenticationForm(AuthenticationForm):
@@ -111,4 +119,111 @@ class ItemForm(forms.ModelForm):
             'name', 'price', 'amount', 'location',
             'short_description', 'description', 'category', 'is_active'
             # DO NOT include 'pictures' or any single ImageField previously on Item here
+        ]
+
+
+class AddToCartForm(forms.Form):
+    quantity = forms.IntegerField(
+        min_value=1,
+        initial=1,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'style': 'width: 80px;'})
+    )
+    item_id = forms.IntegerField(widget=forms.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_show_labels = False
+
+        self.helper.layout = Layout(
+            Row(
+                Column('quantity', css_class='form-group col-auto'),
+                Column('item_id', css_class='form-group d-none'),
+                Column(
+                    Submit('submit', 'Add to Cart', css_class='btn btn-success'),
+                    css_class='form-group col-auto'
+                ),
+                css_class='align-items-center'
+            )
+        )
+
+
+class CartUpdateForm(forms.Form):
+    quantity = forms.IntegerField(
+        min_value=0,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'style': 'width: 80px;'})
+    )
+    item_id = forms.IntegerField(widget=forms.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_show_labels = False
+
+        self.helper.layout = Layout(
+            Row(
+                Column('quantity', css_class='form-group col-auto'),
+                Column('item_id', css_class='form-group d-none'),
+                Column(
+                    Submit('update', 'Update', css_class='btn btn-sm btn-outline-secondary'),
+                    css_class='form-group col-auto'
+                ),
+                css_class='align-items-center'
+            )
+        )
+
+
+class CheckoutForm(forms.ModelForm):
+    payment_method = forms.ChoiceField(
+        choices=PAYMENT_METHODS,
+        widget=forms.RadioSelect(),
+        required=True
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'form-horizontal'
+
+        self.helper.layout = Layout(
+            Fieldset(
+                'Shipping Information',
+                Row(
+                    Column('shipping_address', css_class='form-group col-md-12'),
+                ),
+                Row(
+                    Column('shipping_city', css_class='form-group col-md-6'),
+                    Column('shipping_state', css_class='form-group col-md-6'),
+                ),
+                Row(
+                    Column('shipping_country', css_class='form-group col-md-6'),
+                    Column('shipping_zip', css_class='form-group col-md-6'),
+                ),
+            ),
+            Fieldset(
+                'Contact Information',
+                Row(
+                    Column('contact_email', css_class='form-group col-md-6'),
+                    Column('contact_phone', css_class='form-group col-md-6'),
+                ),
+            ),
+            Fieldset(
+                'Payment Method',
+                'payment_method',
+            ),
+            Div(
+                Submit('submit', 'Complete Order', css_class='btn btn-success btn-lg'),
+                css_class='text-center mt-4'
+            )
+        )
+
+    class Meta:
+        model = Order
+        fields = [
+            'shipping_address', 'shipping_city', 'shipping_state', 
+            'shipping_country', 'shipping_zip', 'contact_email', 
+            'contact_phone', 'payment_method'
         ]

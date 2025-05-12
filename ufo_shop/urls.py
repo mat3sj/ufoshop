@@ -17,11 +17,15 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.conf.urls.i18n import i18n_patterns
 
 from ufo_shop import views
 
 urlpatterns = [
+    # Language selection
+    path('i18n/', include('django.conf.urls.i18n')),
+
     # Admin route
     path('admin/', admin.site.urls, name='admin'),
 

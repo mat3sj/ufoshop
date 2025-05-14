@@ -10,3 +10,4 @@ django-extensions
 Pillow==11.1.0
 django-crispy-forms==2.3
 crispy-bootstrap5
+qrcode==7.4.2

@@ -31,13 +31,9 @@
                             <p><strong>{% trans "Payment Method" %}:</strong> {{ order.get_payment_method_display }}</p>
                         </div>
                         <div class="col-md-6">
-                            <h6>{% trans "Shipping Information" %}</h6>
-                            <address>
-                                {{ order.shipping_address }}<br>
-                                {{ order.shipping_city }}, {{ order.shipping_state }} {{ order.shipping_zip }}<br>
-                                {{ order.shipping_country }}
-                            </address>
-                            <p><strong>{% trans "Contact" %}:</strong> {{ order.contact_phone }}</p>
+                            <h6>{% trans "Contact Information" %}</h6>
+                            <p><strong>{% trans "Email" %}:</strong> {{ order.contact_email }}</p>
+                            <p><strong>{% trans "Phone" %}:</strong> {{ order.contact_phone }}</p>
                         </div>
                     </div>
 
@@ -48,6 +44,7 @@
                                 <tr>
                                     <th>{% trans "Product" %}</th>
                                     <th>{% trans "Quantity" %}</th>
+                                    <th>{% trans "Pickup Location" %}</th>
                                     <th class="text-end">{% trans "Price" %}</th>
                                     <th class="text-end">{% trans "Total" %}</th>
                                 </tr>
@@ -57,6 +54,16 @@
                                 <tr>
                                     <td>{{ item.item.name }}</td>
                                     <td>{{ item.amount }}</td>
+                                    <td>
+                                        {% if item.pickup_location %}
+                                            {{ item.pickup_location.name }}
+                                            {% if item.pickup_location.note %}
+                                                <small class="text-muted d-block">{{ item.pickup_location.note }}</small>
+                                            {% endif %}
+                                        {% else %}
+                                            {% trans "Not specified" %}
+                                        {% endif %}
+                                    </td>
                                     <td class="text-end">{{ item.item.price|floatformat:2 }} {% trans "CZK" %}</td>
                                     <td class="text-end">{{ item.item.price|floatformat:2 }} {% trans "CZK" %}</td>
                                 </tr>
@@ -64,20 +71,64 @@
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td colspan="3" class="text-end"><strong>{% trans "Subtotal" %}:</strong></td>
+                                    <td colspan="4" class="text-end"><strong>{% trans "Subtotal" %}:</strong></td>
                                     <td class="text-end">{{ order.subtotal|floatformat:2 }} {% trans "CZK" %}</td>
                                 </tr>
                                 <tr>
-                                    <td colspan="3" class="text-end"><strong>{% trans "Shipping" %}:</strong></td>
+                                    <td colspan="4" class="text-end"><strong>{% trans "Shipping" %}:</strong></td>
                                     <td class="text-end">{{ order.shipping_cost|floatformat:2 }} {% trans "CZK" %}</td>
                                 </tr>
+                                {% if order.needs_receipt %}
                                 <tr>
-                                    <td colspan="3" class="text-end"><strong>{% trans "Total" %}:</strong></td>
+                                    <td colspan="4" class="text-end"><strong>{% trans "Receipt Fee (7%)" %}:</strong></td>
+                                    <td class="text-end">{{ order.receipt_fee|floatformat:2 }} {% trans "CZK" %}</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <td colspan="4" class="text-end"><strong>{% trans "Total" %}:</strong></td>
                                     <td class="text-end"><strong>{{ order.total|floatformat:2 }} {% trans "CZK" %}</strong></td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
+
+                    {% if order.payment_method == 'qr_code' %}
+                    <div class="mt-4">
+                        <h6>{% trans "Payment Information" %}</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0">{% trans "QR Code Payment" %}</h5>
+                                    </div>
+                                    <div class="card-body text-center">
+                                        {{ order.get_payment_qr_code }}
+                                        <div class="mt-3">
+                                            <p><strong>{% trans "Bank Account" %}:</strong> {{ BANK_ACCOUNT.account_number }}</p>
+                                            <p><strong>{% trans "Amount" %}:</strong> {{ order.total|floatformat:2 }} {{ BANK_ACCOUNT.currency }}</p>
+                                            <p><strong>{% trans "Variable Symbol" %}:</strong> {{ order.id }}</p>
+                                            <p><strong>{% trans "Message" %}:</strong> Order #{{ order.id }} - {{ order.contact_email }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-info">
+                                    <h5>{% trans "Payment Instructions" %}</h5>
+                                    <ol>
+                                        <li>{% trans "Scan the QR code with your banking app" %}</li>
+                                        <li>{% trans "Verify the payment details" %}</li>
+                                        <li>{% trans "Confirm the payment" %}</li>
+                                    </ol>
+                                    <p>{% trans "Your order will be processed once the payment is received." %}</p>
+                                    {% if order.needs_receipt %}
+                                    <p><strong>{% trans "Note" %}:</strong> {% trans "A receipt will be provided as requested." %}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
                 <div class="card-footer bg-light">
                     <div class="d-flex justify-content-between">

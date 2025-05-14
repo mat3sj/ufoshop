@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.http import HttpResponseRedirect
 
 from ufo_shop import forms
-from ufo_shop.models import Item, Category, Picture, Order, OrderItem
+from ufo_shop.models import Item, Category, Picture, Order, OrderItem, BANK_ACCOUNT
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy, reverse
 from ufo_shop.utils import ufoshop_send_email
@@ -149,6 +149,11 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
     template_name = 'ufo_shop/item_form.html'
     success_url = reverse_lazy('merchandiser_shop')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
         # Assign the current logged-in user as the merchandiser
         form.instance.merchandiser = self.request.user
@@ -174,9 +179,14 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
 # View for updating an existing item
 class ItemUpdateView(LoginRequiredMixin, UpdateView):
     model = Item
-    fields = ['name', 'price', 'amount', 'location', 'short_description', 'description', 'category', 'is_active']
+    form_class = forms.ItemForm  # Use the ItemForm instead of fields
     template_name = 'ufo_shop/item_form.html'
     success_url = reverse_lazy('merchandiser_shop')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def get_queryset(self):
         # Ensure users can only edit their own items
@@ -344,21 +354,37 @@ class CheckoutView(LoginRequiredMixin, FormView):
         context = super().get_context_data(**kwargs)
         cart = self.get_cart()
         cart.calculate_totals()
+        cart_items = cart.orderitem_set.all().select_related('item')
         context['cart'] = cart
-        context['cart_items'] = cart.orderitem_set.all().select_related('item')
+        context['cart_items'] = cart_items
         return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        cart = self.get_cart()
+        kwargs['cart_items'] = cart.orderitem_set.all().select_related('item')
+        return kwargs
 
     def form_valid(self, form):
         cart = self.get_cart()
 
-        # Update the cart with shipping and payment information
+        # Update the cart with contact and payment information
         for field in form.cleaned_data:
-            setattr(cart, field, form.cleaned_data[field])
+            if field in ['contact_email', 'contact_phone', 'payment_method', 'needs_receipt']:
+                setattr(cart, field, form.cleaned_data[field])
 
         # Update the status to ORDERED
         cart.status = Order.Status.ORDERED
         cart.calculate_totals()
         cart.save()
+
+        # Update the pickup locations for each order item
+        cart_items = cart.orderitem_set.all()
+        for item in cart_items:
+            pickup_location = form.get_pickup_location(item.id)
+            if pickup_location:
+                item.pickup_location = pickup_location
+                item.save()
 
         # Send order confirmation email
         self.send_order_confirmation(cart)
@@ -381,6 +407,7 @@ class CheckoutView(LoginRequiredMixin, FormView):
             'items': items,
             'user': self.request.user,
             'order_url': order_url,
+            'BANK_ACCOUNT': BANK_ACCOUNT,
         }
 
         ufoshop_send_email(
@@ -404,6 +431,7 @@ class OrderConfirmationView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['items'] = self.object.orderitem_set.all().select_related('item')
+        context['BANK_ACCOUNT'] = BANK_ACCOUNT
         return context
 
 

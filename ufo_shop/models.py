@@ -1,14 +1,23 @@
 
-from PIL import Image as PilImage
+from PIL import Image as PilImage, ImageDraw
 from io import BytesIO
 from django.core.files.base import ContentFile
 import os
+import qrcode
+import base64
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils.html import mark_safe
 
 THUMBNAIL_SIZE = 150
 SQUARE_IMAGE_SIZE = 1024
+
+# Bank account details for QR code payment
+BANK_ACCOUNT = {
+    'account_number': '670100-2210457032/6210',
+    'currency': 'CZK',
+}
 
 
 class User(AbstractUser):
@@ -26,6 +35,9 @@ class Location(models.Model):
     name = models.CharField("Location Name", max_length=50)
     address = models.TextField("Address", default='')
     merchandiser = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Merchandiser")
+    is_universal = models.BooleanField("Universal Location", default=False, 
+                                      help_text="If checked, this location will be available for all merchandisers")
+    note = models.TextField("Additional Note", blank=True, null=True)
 
     class Meta:
         verbose_name = "Location"
@@ -50,7 +62,7 @@ class Item(models.Model):
     merchandiser = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Merchandiser")
     price = models.IntegerField("Price", default=0)
     amount = models.IntegerField("Amount", null=True, blank=True)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Location")
+    locations = models.ManyToManyField(Location, blank=True, verbose_name="Pickup Locations")
     short_description = models.CharField("Short Description", max_length=255, default='')
     description = models.TextField("Full Description", blank=True, null=True)
     category = models.ManyToManyField('Category', blank=True, verbose_name="Categories")
@@ -92,6 +104,8 @@ class Order(models.Model):
     # Payment information
     payment_method = models.CharField("Payment Method", max_length=50, blank=True, null=True)
     payment_id = models.CharField("Payment ID", max_length=100, blank=True, null=True)
+    needs_receipt = models.BooleanField("Needs Receipt", default=False, help_text="If checked, a 7% fee will be added for receipt processing")
+    receipt_fee = models.DecimalField("Receipt Fee", max_digits=10, decimal_places=2, default=0)
 
     # Order details
     subtotal = models.DecimalField("Subtotal", max_digits=10, decimal_places=2, default=0)
@@ -118,14 +132,124 @@ class Order(models.Model):
         self.subtotal = sum(item.item.price * item.amount for item in order_items)
         # For now, shipping is free
         self.shipping_cost = 0
-        self.total = self.subtotal + self.shipping_cost
+
+        # Calculate receipt fee if needed (7% of subtotal)
+        self.receipt_fee = 0
+        if self.needs_receipt:
+            self.receipt_fee = self.subtotal * 0.07
+
+        self.total = self.subtotal + self.shipping_cost + self.receipt_fee
         return self.total
+
+    def _convert_to_iban(self, account_number):
+        """
+        Convert Czech bank account number to IBAN format
+        Format: CZ + check digits + bank code (4 digits) + account number (up to 16 digits)
+        """
+        # Split account number into parts
+        parts = account_number.split('/')
+        if len(parts) != 2:
+            # If the format is not as expected, return the original account number
+            return account_number
+
+        account_prefix_number, bank_code = parts
+
+        # Remove any hyphens from the account number
+        account_prefix_number = account_prefix_number.replace('-', '')
+
+        # Pad the account number with leading zeros to make it 16 digits
+        account_number_padded = account_prefix_number.zfill(16)
+
+        # Prepare the IBAN without check digits
+        # For Czech Republic, the BBAN (Basic Bank Account Number) is bank_code + account_number_padded
+        bban = f"{bank_code}{account_number_padded}"
+
+        # Rearrange the country code and add '00' as placeholder for check digits
+        # Convert letters to numbers: A=10, B=11, ..., Z=35
+        # For 'CZ', C=12, Z=35
+        rearranged = f"{bban}123500"  # 'CZ' converted to digits (12, 35) + '00'
+
+        # Calculate the check digits using mod-97
+        # Since the number might be too large for int conversion, we'll calculate mod-97 in chunks
+        remainder = 0
+        for i in range(0, len(rearranged), 6):
+            chunk = rearranged[i:i+6]
+            remainder = (remainder * 10**len(chunk) + int(chunk)) % 97
+
+        # Calculate the check digits
+        check_digits = str(98 - remainder).zfill(2)
+
+        # Construct the final IBAN
+        iban = f"CZ{check_digits}{bban}"
+
+        return iban
+
+    def get_payment_qr_code(self):
+        """Generate a stylish QR code for payment with rounded dots"""
+        if not self.id:
+            return None
+
+        # Create QR code data
+        account_number = BANK_ACCOUNT['account_number']
+        # Convert account number to IBAN format
+        iban = self._convert_to_iban(account_number)
+        amount = float(self.total)
+        currency = BANK_ACCOUNT['currency']
+        message = f"Order #{self.id} - {self.contact_email}"
+        variable_symbol = str(self.id)
+
+
+        # Format the QR code data according to the Czech QR payment standard
+        qr_data = f"SPD*1.0*ACC:{iban}*AM:{amount:.2f}*CC:{currency}*MSG:{message}*X-VS:{variable_symbol}*RN:Mates-UfoShop"
+
+        # Create QR code with custom settings for rounded dots and high error correction
+        qr = qrcode.QRCode(
+            version=None,  # Allow automatic version selection based on data size
+            error_correction=qrcode.constants.ERROR_CORRECT_H,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(qr_data)
+        qr.make(fit=True)
+
+        # Get the QR code matrix
+        matrix = qr.get_matrix()
+
+        # Create a blank white image
+        size = (len(matrix) + 8) * 10  # 8 is for the border (4 on each side), 10 is box_size
+        img = PilImage.new('RGBA', (size, size), (255, 255, 255, 255))
+        draw = ImageDraw.Draw(img)
+
+        # Calculate the size of each module (dot)
+        module_size = 10  # box_size
+
+        # Draw rounded dots for all QR code data points
+        for y in range(len(matrix)):
+            for x in range(len(matrix[y])):
+                if matrix[y][x]:
+                    # Calculate the position of the dot
+                    pos_x = (x + 4) * module_size  # 4 is for the left border
+                    pos_y = (y + 4) * module_size  # 4 is for the top border
+
+                    # Draw a circle instead of a square
+                    draw.ellipse(
+                        [(pos_x, pos_y), (pos_x + module_size, pos_y + module_size)],
+                        fill="black"
+                    )
+
+        # Convert to base64 for embedding in HTML
+        buffered = BytesIO()
+        img.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+
+        return mark_safe(f'<img src="data:image/png;base64,{img_str}" alt="Payment QR Code" class="img-fluid">')
 
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, verbose_name="Order")
     item = models.ForeignKey(Item, on_delete=models.CASCADE, verbose_name="Item")
     amount = models.IntegerField("Amount", default=1)
+    pickup_location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Pickup Location")
     created_at = models.DateTimeField("Created At", auto_now_add=True)
 
     class Meta:

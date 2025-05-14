@@ -77,6 +77,52 @@ class Command(BaseCommand):
             logger.info("User 'test_user' already exists")
 
         ###############################################################################
+        # Create some locations
+        ###############################################################################
+        decorate_model_creation(Location)
+
+        # Get the universal location or create it if it doesn't exist
+        universal_location = Location.objects.filter(is_universal=True).first()
+        if not universal_location:
+            universal_location = create_shit(Location, 'At the Soonest Tournament', dict(
+                name='At the Soonest Tournament',
+                address='Will be specified by the tournament organizer',
+                merchandiser=admin,
+                is_universal=True,
+                note='Items will be available for pickup at the next tournament. Please check the tournament schedule.'
+            ))
+
+        # Create locations for admin
+        admin_location1 = create_shit(Location, 'Prague Office', dict(
+            name='Prague Office',
+            address='Václavské náměstí 1, 110 00 Praha 1',
+            merchandiser=admin,
+            note='Available for pickup Monday-Friday, 9:00-17:00'
+        ))
+
+        admin_location2 = create_shit(Location, 'Brno Store', dict(
+            name='Brno Store',
+            address='Náměstí Svobody 20, 602 00 Brno',
+            merchandiser=admin,
+            note='Available for pickup Monday-Saturday, 10:00-18:00'
+        ))
+
+        # Create locations for test_merchandiser
+        merch_location1 = create_shit(Location, 'Ostrava Pickup Point', dict(
+            name='Ostrava Pickup Point',
+            address='Masarykovo náměstí 15, 702 00 Ostrava',
+            merchandiser=test_merchandiser,
+            note='Available for pickup on weekends only'
+        ))
+
+        merch_location2 = create_shit(Location, 'Plzeň Training Center', dict(
+            name='Plzeň Training Center',
+            address='Americká 42, 301 00 Plzeň',
+            merchandiser=test_merchandiser,
+            note='Available during training sessions'
+        ))
+
+        ###############################################################################
         # Create some categories
         ###############################################################################
         decorate_model_creation(Category)
@@ -97,6 +143,7 @@ class Command(BaseCommand):
             description='Pohodlné bavlněné tričko s roztomilým potiskem tučňáka. Vhodné pro každodenní nošení. K dispozici ve všech velikostech.'
         ))
         t_shirt.category.add(clothes_category)
+        t_shirt.locations.add(universal_location, admin_location1, admin_location2)
 
         long_socks = create_shit(Item, 'Fešácký nákolenky', dict(
             name='Fešácký nákolenky',
@@ -108,6 +155,7 @@ class Command(BaseCommand):
             description='Kvalitní nákolenky speciálně navržené pro Ultimate frisbee. Chrání kolena při skluzech a pádech. Elastický materiál zajišťuje pohodlné nošení. Dostupné ve velikostech S-XL.'
         ))
         long_socks.category.add(clothes_category)
+        long_socks.locations.add(universal_location, merch_location1, merch_location2)
 
         frisbee = create_shit(Item, 'Ultimate frisbee disk', dict(
             name='Ultimate frisbee disk',
@@ -119,6 +167,7 @@ class Command(BaseCommand):
             description='Profesionální disk schválený pro soutěžní hru Ultimate frisbee. Vyrobeno z odolného plastu.'
         ))
         frisbee.category.add(gear_category)
+        frisbee.locations.add(universal_location, admin_location1)
 
         shorts = create_shit(Item, 'Sportovní šortky', dict(
             name='Sportovní šortky',
@@ -130,6 +179,7 @@ class Command(BaseCommand):
             description='Pohodlné sportovní šortky ideální pro Ultimate frisbee. Rychleschnoucí materiál.'
         ))
         shorts.category.add(clothes_category)
+        shorts.locations.add(universal_location, merch_location2)
 
         cap = create_shit(Item, 'Kšiltovka UFO', dict(
             name='Kšiltovka UFO',
@@ -141,6 +191,7 @@ class Command(BaseCommand):
             description='Kvalitní baseballová kšiltovka s vyšitým logem UFO. Nastavitelná velikost.'
         ))
         cap.category.add(clothes_category)
+        cap.locations.add(universal_location, admin_location2)
 
         water_bottle = create_shit(Item, 'Sportovní láhev', dict(
             name='Sportovní láhev',
@@ -152,6 +203,7 @@ class Command(BaseCommand):
             description='Odolná sportovní láhev s uzavíratelným pítkem. Objem 0.7l.'
         ))
         water_bottle.category.add(gear_category)
+        water_bottle.locations.add(universal_location, merch_location1)
 
         sweatshirt = create_shit(Item, 'Mikina UFO', dict(
             name='Mikina UFO',
@@ -163,6 +215,7 @@ class Command(BaseCommand):
             description='Pohodlná mikina s kapucí a klokaní kapsou. Logo UFO na přední straně.'
         ))
         sweatshirt.category.add(clothes_category)
+        sweatshirt.locations.add(universal_location, admin_location1, admin_location2)
 
         wristband = create_shit(Item, 'Potítko', dict(
             name='Potítko',
@@ -174,6 +227,7 @@ class Command(BaseCommand):
             description='Bavlněné potítko s logem UFO. Perfektní pro sport.'
         ))
         wristband.category.add(clothes_category, gear_category)
+        wristband.locations.add(universal_location, merch_location1, merch_location2)
 
         backpack = create_shit(Item, 'Sportovní batoh', dict(
             name='Sportovní batoh',
@@ -185,6 +239,7 @@ class Command(BaseCommand):
             description='Kvalitní batoh s přihrádkou na disk a nápoje. Objem 30l.'
         ))
         backpack.category.add(gear_category)
+        backpack.locations.add(universal_location, admin_location1)
 
         beanie = create_shit(Item, 'Zimní čepice', dict(
             name='Zimní čepice',
@@ -196,6 +251,7 @@ class Command(BaseCommand):
             description='Pletená zimní čepice s logem UFO. Příjemný materiál.'
         ))
         beanie.category.add(clothes_category)
+        beanie.locations.add(universal_location, merch_location2)
 
         towel = create_shit(Item, 'Sportovní ručník', dict(
             name='Sportovní ručník',
@@ -207,6 +263,7 @@ class Command(BaseCommand):
             description='Lehký a skladný sportovní ručník. Rozměry 100x50cm.'
         ))
         towel.category.add(gear_category)
+        towel.locations.add(universal_location, admin_location2)
 
         training_shirt = create_shit(Item, 'Tréninkové tričko', dict(
             name='Tréninkové tričko',
@@ -218,6 +275,7 @@ class Command(BaseCommand):
             description='Prodyšné sportovní tričko z funkčního materiálu. Ideální na tréninky.'
         ))
         training_shirt.category.add(clothes_category)
+        training_shirt.locations.add(universal_location, merch_location1, merch_location2)
 
         socks = create_shit(Item, 'Sportovní ponožky', dict(
             name='Sportovní ponožky',
@@ -229,6 +287,7 @@ class Command(BaseCommand):
             description='Pohodlné ponožky se zesílenou patou a špičkou. Prodej po párech.'
         ))
         socks.category.add(clothes_category)
+        socks.locations.add(universal_location, admin_location1, admin_location2)
 
         sleeve = create_shit(Item, 'Kompresní rukáv', dict(
             name='Kompresní rukáv',
@@ -240,6 +299,7 @@ class Command(BaseCommand):
             description='Elastický kompresní rukáv pro podporu při sportu. Chrání před zraněním.'
         ))
         sleeve.category.add(clothes_category, gear_category)
+        sleeve.locations.add(universal_location, merch_location1)
 
         ###############################################################################
         # Create some Orders
@@ -253,12 +313,14 @@ class Command(BaseCommand):
         order_item_1 = create_shit(OrderItem, 'Order item 1', dict(
             order=cart_order,
             amount=2,
-            item=long_socks
+            item=long_socks,
+            pickup_location=merch_location1
         ))
         order_item_2 = create_shit(OrderItem, 'Order item 2', dict(
             order=cart_order,
             amount=1,
-            item=frisbee
+            item=frisbee,
+            pickup_location=admin_location1
         ))
 
         # Order in cart for test_user
@@ -269,72 +331,90 @@ class Command(BaseCommand):
         order_item_3 = create_shit(OrderItem, 'Order item 3', dict(
             order=test_user_cart,
             item=t_shirt,
-            amount=1
+            amount=1,
+            pickup_location=admin_location1
         ))
         order_item_4 = create_shit(OrderItem, 'Order item 4', dict(
             order=test_user_cart,
             item=cap,
-            amount=1
+            amount=1,
+            pickup_location=universal_location
         ))
 
         # Ordered orders
         ordered1 = create_shit(Order, 'Order ordered 1', dict(
             user=test_user,
-            status=Order.Status.ORDERED
+            status=Order.Status.ORDERED,
+            contact_email=test_user.email,
+            contact_phone=test_user.phone or '123456789'
         ))
         order_item_5 = create_shit(OrderItem, 'Order item 5', dict(
             order=ordered1,
             item=backpack,
-            amount=1
+            amount=1,
+            pickup_location=admin_location1
         ))
         order_item_6 = create_shit(OrderItem, 'Order item 6', dict(
             order=ordered1,
             item=water_bottle,
-            amount=2
+            amount=2,
+            pickup_location=merch_location1
         ))
 
         ordered2 = create_shit(Order, 'Order ordered 2', dict(
             user=test_merchandiser,
-            status=Order.Status.ORDERED
+            status=Order.Status.ORDERED,
+            contact_email=test_merchandiser.email,
+            contact_phone=test_merchandiser.phone or '987654321'
         ))
         order_item_7 = create_shit(OrderItem, 'Order item 7', dict(
             order=ordered2,
             item=sweatshirt,
-            amount=1
+            amount=1,
+            pickup_location=universal_location
         ))
 
         # Fulfilled orders
         fulfilled1 = create_shit(Order, 'Order fulfilled 1', dict(
             user=admin,
-            status=Order.Status.FULFILLED
+            status=Order.Status.FULFILLED,
+            contact_email=admin.email,
+            contact_phone=admin.phone or '555123456'
         ))
         order_item_8 = create_shit(OrderItem, 'Order item 8', dict(
             order=fulfilled1,
             item=t_shirt,
-            amount=3
+            amount=3,
+            pickup_location=admin_location2
         ))
         order_item_9 = create_shit(OrderItem, 'Order item 9', dict(
             order=fulfilled1,
             item=long_socks,
-            amount=2
+            amount=2,
+            pickup_location=universal_location
         ))
 
         fulfilled2 = create_shit(Order, 'Order fulfilled 2', dict(
             user=test_user,
-            status=Order.Status.FULFILLED
+            status=Order.Status.FULFILLED,
+            contact_email=test_user.email,
+            contact_phone=test_user.phone or '555987654'
         ))
         order_item_10 = create_shit(OrderItem, 'Order item 10', dict(
             order=fulfilled2,
             item=sleeve,
-            amount=2
+            amount=2,
+            pickup_location=merch_location1
         ))
         order_item_11 = create_shit(OrderItem, 'Order item 11', dict(
             order=fulfilled2,
             item=towel,
-            amount=1
+            amount=1,
+            pickup_location=admin_location2
         ))
         order_item_12 = create_shit(OrderItem, 'Order item 12', dict(
             order=fulfilled2,
             item=beanie,
-            amount=1
+            amount=1,
+            pickup_location=merch_location2
         ))

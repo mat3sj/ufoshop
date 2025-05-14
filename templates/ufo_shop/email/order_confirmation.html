@@ -22,6 +22,7 @@
             <th style="padding: 10px; text-align: left;">Item</th>
             <th style="padding: 10px; text-align: right;">Price</th>
             <th style="padding: 10px; text-align: center;">Quantity</th>
+            <th style="padding: 10px; text-align: left;">Pickup Location</th>
             <th style="padding: 10px; text-align: right;">Total</th>
           </tr>
         </thead>
@@ -31,26 +32,62 @@
             <td style="padding: 10px;">{{ item.item.name }}</td>
             <td style="padding: 10px; text-align: right;">{{ item.item.price|floatformat:2 }} {% trans "CZK" %}</td>
             <td style="padding: 10px; text-align: center;">{{ item.amount }}</td>
+            <td style="padding: 10px;">
+              {% if item.pickup_location %}
+                {{ item.pickup_location.name }}
+                {% if item.pickup_location.note %}
+                  <div style="font-size: 0.85em; color: #6c757d;">{{ item.pickup_location.note }}</div>
+                {% endif %}
+              {% else %}
+                {% trans "Not specified" %}
+              {% endif %}
+            </td>
             <td style="padding: 10px; text-align: right;">{{ item.item.price|floatformat:2 }} {% trans "CZK" %}</td>
           </tr>
           {% endfor %}
         </tbody>
         <tfoot>
           <tr>
-            <td colspan="3" style="padding: 10px; text-align: right;"><strong>Subtotal:</strong></td>
+            <td colspan="4" style="padding: 10px; text-align: right;"><strong>Subtotal:</strong></td>
             <td style="padding: 10px; text-align: right;"><strong>{{ order.subtotal|floatformat:2 }} {% trans "CZK" %}</strong></td>
           </tr>
           <tr>
-            <td colspan="3" style="padding: 10px; text-align: right;"><strong>Shipping:</strong></td>
+            <td colspan="4" style="padding: 10px; text-align: right;"><strong>Shipping:</strong></td>
             <td style="padding: 10px; text-align: right;"><strong>{{ order.shipping_cost|floatformat:2 }} {% trans "CZK" %}</strong></td>
           </tr>
+          {% if order.needs_receipt %}
           <tr>
-            <td colspan="3" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
+            <td colspan="4" style="padding: 10px; text-align: right;"><strong>Receipt Fee (7%):</strong></td>
+            <td style="padding: 10px; text-align: right;"><strong>{{ order.receipt_fee|floatformat:2 }} {% trans "CZK" %}</strong></td>
+          </tr>
+          {% endif %}
+          <tr>
+            <td colspan="4" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
             <td style="padding: 10px; text-align: right;"><strong>{{ order.total|floatformat:2 }} {% trans "CZK" %}</strong></td>
           </tr>
         </tfoot>
       </table>
     </div>
+
+    {% if order.payment_method == 'qr_code' %}
+    <div style="margin-top: 30px; margin-bottom: 30px;">
+      <h2>Payment Information</h2>
+      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px;">
+        <h3 style="color: #0d6efd;">QR Code Payment</h3>
+        <p>Please use the following information to complete your payment:</p>
+        <ul>
+          <li><strong>Bank Account:</strong> {{ BANK_ACCOUNT.account_number }}</li>
+          <li><strong>Amount:</strong> {{ order.total|floatformat:2 }} {{ BANK_ACCOUNT.currency }}</li>
+          <li><strong>Variable Symbol:</strong> {{ order.id }}</li>
+          <li><strong>Message:</strong> Order #{{ order.id }} - {{ order.contact_email }}</li>
+        </ul>
+        <p>You can also scan the QR code on the order confirmation page to complete your payment.</p>
+        {% if order.needs_receipt %}
+        <p><strong>Note:</strong> A receipt will be provided as requested.</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
 
     <div class="cta-buttons">
       <a href="{{ order_url }}" class="btn">View Order Details</a>

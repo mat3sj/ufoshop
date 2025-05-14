@@ -67,13 +67,18 @@ class PictureInline(admin.TabularInline):  # Use TabularInline for a compact vie
 
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
-    list_display = ('name', 'merchandiser', 'price', 'amount', 'location', 'category_list', 'is_active',
+    list_display = ('name', 'merchandiser', 'price', 'amount', 'locations_list', 'category_list', 'is_active',
                     'created_at')
-    list_filter = ('is_active', 'location', 'category')
+    list_filter = ('is_active', 'category')
     search_fields = ('name', 'short_description')
     ordering = ('-created_at',)
     inlines = [PictureInline]
     exclude = ('product_imgs',)
+
+    def locations_list(self, obj):
+        return ", ".join([location.name for location in obj.locations.all()])
+
+    locations_list.short_description = 'Pickup Locations'
 
     def category_list(self, obj):
         return ", ".join([category.name for category in obj.category.all()])
@@ -115,7 +120,9 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', 'address', 'merchandiser', 'is_universal')
+    list_filter = ('is_universal', 'merchandiser')
+    search_fields = ('name', 'address')
 
 
 @admin.register(Order)
@@ -132,7 +139,7 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(OrderItem)
 class OrderItemtAdmin(admin.ModelAdmin):
-    list_display = ('id', 'order', 'item', 'amount')
+    list_display = ('id', 'order', 'item', 'amount', 'pickup_location')
 
 
 @admin.register(Picture)

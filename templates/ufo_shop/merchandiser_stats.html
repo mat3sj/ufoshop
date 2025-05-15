@@ -1,0 +1,134 @@
+{% extends 'ufo_shop/base.html' %}
+{% load static %}
+{% load ufo_shop_extras %}
+
+{% block title %}Merchandiser Statistics{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Your Sales Statistics</h1>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Sales</h5>
+                    <p class="card-text">
+                        <strong>Items Sold:</strong> {{ total_sales.total_items|default:"0" }}<br>
+                        <strong>Total Revenue:</strong> {{ total_sales.total_revenue|default:"0" }} CZK
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Selling Items -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Top Selling Items</h5>
+        </div>
+        <div class="card-body">
+            {% if top_items %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Quantity Sold</th>
+                                <th>Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in top_items %}
+                                <tr>
+                                    <td>{{ item.item__name }}</td>
+                                    <td>{{ item.total_sold }}</td>
+                                    <td>{{ item.revenue }} CZK</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No sales data available yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sales Over Time -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Sales by Month</h5>
+        </div>
+        <div class="card-body">
+            {% if sales_by_month %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Items Sold</th>
+                                <th>Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for month_data in sales_by_month %}
+                                <tr>
+                                    <td>{{ month_data.month|date:"F Y" }}</td>
+                                    <td>{{ month_data.total_items }}</td>
+                                    <td>{{ month_data.revenue }} CZK</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No monthly sales data available yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Sales -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Recent Sales</h5>
+        </div>
+        <div class="card-body">
+            {% if recent_sales %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sale in recent_sales %}
+                                <tr>
+                                    <td>{{ sale.order.id }}</td>
+                                    <td>{{ sale.order.created_at|date:"M d, Y" }}</td>
+                                    <td>{{ sale.item.name }}</td>
+                                    <td>{{ sale.amount }}</td>
+                                    <td>{{ sale.amount|multiply:sale.item.price }} CZK</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No recent sales data available.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{% url 'merchandiser_shop' %}" class="btn btn-primary">Back to Your Shop</a>
+    </div>
+</div>
+{% endblock %}
+

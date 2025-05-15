@@ -32,7 +32,14 @@
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
               <li><a class="dropdown-item" href="{% url 'orders' %}">{% trans "My Orders" %}</a></li>
               <li><a class="dropdown-item" href="{% url 'profile' %}">{% trans "Profile" %}</a></li>
+              {% if user.is_merchandiser %}
               <li><a class="dropdown-item" href="{% url 'merchandiser_shop' %}">{% trans "Manage your shop" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'merchandiser_stats' %}">{% trans "Sales Statistics" %}</a></li>
+              {% endif %}
+              {% if user.is_superuser %}
+              <li><a class="dropdown-item" href="{% url 'admin_stats' %}">{% trans "Global Statistics" %}</a></li>
+              <li><a class="dropdown-item" href="{% url 'admin:index' %}">{% trans "Admin Panel" %}</a></li>
+              {% endif %}
               <li>
                 <form method="post" action="{% url 'logout' %}">
                   {% csrf_token %}

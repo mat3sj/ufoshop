@@ -49,6 +49,10 @@ urlpatterns = [
     path('order/<int:pk>/confirmation/', views.OrderConfirmationView.as_view(), name='order_confirmation'),
     path('orders/', views.OrderHistoryView.as_view(), name='orders'),
 
+    # Statistics
+    path('merchandiser/stats/', views.MerchandiserStatsView.as_view(), name='merchandiser_stats'),
+    path('statistics/global/', views.AdminStatsView.as_view(), name='admin_stats'),
+
     # # About page
     # path('about/', TemplateView.as_view(template_name='about.html'), name='about'),
     #

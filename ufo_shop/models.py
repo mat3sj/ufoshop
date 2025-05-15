@@ -5,6 +5,9 @@ from django.core.files.base import ContentFile
 import os
 import qrcode
 import base64
+from qrcode.image.styledpil import StyledPilImage
+from qrcode.image.styles.moduledrawers import HorizontalBarsDrawer
+from qrcode.image.styles.moduledrawers.pil import RoundedModuleDrawer
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -202,40 +205,23 @@ class Order(models.Model):
         # Format the QR code data according to the Czech QR payment standard
         qr_data = f"SPD*1.0*ACC:{iban}*AM:{amount:.2f}*CC:{currency}*MSG:{message}*X-VS:{variable_symbol}*RN:Mates-UfoShop"
 
-        # Create QR code with custom settings for rounded dots and high error correction
+        # Create QR code with custom settings for rounded dots and medium error correction
         qr = qrcode.QRCode(
             version=None,  # Allow automatic version selection based on data size
-            error_correction=qrcode.constants.ERROR_CORRECT_H,
-            box_size=10,
-            border=4,
+            error_correction=qrcode.constants.ERROR_CORRECT_M,  # Medium error correction for smaller size
+            box_size=6,  # Smaller box size for a more compact QR code
+            border=2,  # Minimum recommended border
+            image_factory=StyledPilImage,  # Use StyledPilImage for custom styling
         )
         qr.add_data(qr_data)
         qr.make(fit=True)
 
-        # Get the QR code matrix
-        matrix = qr.get_matrix()
-
-        # Create a blank white image
-        size = (len(matrix) + 8) * 10  # 8 is for the border (4 on each side), 10 is box_size
-        img = PilImage.new('RGBA', (size, size), (255, 255, 255, 255))
-        draw = ImageDraw.Draw(img)
-
-        # Calculate the size of each module (dot)
-        module_size = 10  # box_size
-
-        # Draw rounded dots for all QR code data points
-        for y in range(len(matrix)):
-            for x in range(len(matrix[y])):
-                if matrix[y][x]:
-                    # Calculate the position of the dot
-                    pos_x = (x + 4) * module_size  # 4 is for the left border
-                    pos_y = (y + 4) * module_size  # 4 is for the top border
-
-                    # Draw a circle instead of a square
-                    draw.ellipse(
-                        [(pos_x, pos_y), (pos_x + module_size, pos_y + module_size)],
-                        fill="black"
-                    )
+        # Generate the QR code image with rounded modules
+        img = qr.make_image(
+            module_drawer=HorizontalBarsDrawer(),  # Use RoundedModuleDrawer for rounded dots
+            fill_color="black",
+            back_color="white"
+        )
 
         # Convert to base64 for embedding in HTML
         buffered = BytesIO()

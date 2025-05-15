@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
 
-    'ufo_shop',
+    'ufo_shop.apps.UfoShopConfig',
 
     # 'allauth',
     # 'allauth.account',

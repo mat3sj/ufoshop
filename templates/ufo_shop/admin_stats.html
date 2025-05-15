@@ -1,0 +1,218 @@
+{% extends 'ufo_shop/base.html' %}
+{% load static %}
+{% load ufo_shop_extras %}
+
+{% block title %}Admin Statistics{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Global Sales Statistics</h1>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Sales</h5>
+                    <p class="card-text">
+                        <strong>Items Sold:</strong> {{ total_sales.total_items|default:"0" }}<br>
+                        <strong>Total Revenue:</strong> {{ total_sales.total_revenue|default:"0" }} CZK<br>
+                        <strong>Active Merchandisers:</strong> {{ total_sales.total_merchandisers|default:"0" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Selling Items -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Top Selling Items</h5>
+        </div>
+        <div class="card-body">
+            {% if top_items %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Merchandiser</th>
+                                <th>Quantity Sold</th>
+                                <th>Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in top_items %}
+                                <tr>
+                                    <td>{{ item.item__name }}</td>
+                                    <td>{{ item.item__merchandiser__email }}</td>
+                                    <td>{{ item.total_sold }}</td>
+                                    <td>{{ item.revenue }} CZK</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No sales data available yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Top Merchandisers -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5>Top Merchandisers</h5>
+            <div class="btn-group">
+                <a href="?sort_by=revenue&sort_order=desc" class="btn btn-sm btn-outline-secondary {% if sort_by == 'revenue' and sort_order == 'desc' %}active{% endif %}">Revenue ↓</a>
+                <a href="?sort_by=revenue&sort_order=asc" class="btn btn-sm btn-outline-secondary {% if sort_by == 'revenue' and sort_order == 'asc' %}active{% endif %}">Revenue ↑</a>
+                <a href="?sort_by=items&sort_order=desc" class="btn btn-sm btn-outline-secondary {% if sort_by == 'items' and sort_order == 'desc' %}active{% endif %}">Items ↓</a>
+                <a href="?sort_by=merchandiser&sort_order=asc" class="btn btn-sm btn-outline-secondary {% if sort_by == 'merchandiser' and sort_order == 'asc' %}active{% endif %}">Name A-Z</a>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if top_merchandisers %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Merchandiser</th>
+                                <th>Name</th>
+                                <th>Unique Items</th>
+                                <th>Items Sold</th>
+                                <th>Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for merchandiser in top_merchandisers %}
+                                <tr>
+                                    <td>{{ merchandiser.item__merchandiser__email }}</td>
+                                    <td>
+                                        {% if merchandiser.item__merchandiser__first_name or merchandiser.item__merchandiser__last_name %}
+                                            {{ merchandiser.item__merchandiser__first_name }} {{ merchandiser.item__merchandiser__last_name }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ merchandiser.unique_items }}</td>
+                                    <td>{{ merchandiser.total_items }}</td>
+                                    <td>{{ merchandiser.revenue }} CZK</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No merchandiser data available yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sales Over Time -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Sales by Month</h5>
+        </div>
+        <div class="card-body">
+            {% if sales_by_month %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Items Sold</th>
+                                <th>Revenue</th>
+                                <th>Active Merchandisers</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for month_data in sales_by_month %}
+                                <tr>
+                                    <td>{{ month_data.month|date:"F Y" }}</td>
+                                    <td>{{ month_data.total_items }}</td>
+                                    <td>{{ month_data.revenue }} CZK</td>
+                                    <td>{{ month_data.merchandiser_count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No monthly sales data available yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sales by Category -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Sales by Category</h5>
+        </div>
+        <div class="card-body">
+            {% if sales_by_category %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Items Sold</th>
+                                <th>Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category in sales_by_category %}
+                                <tr>
+                                    <td>{{ category.item__category__name|default:"Uncategorized" }}</td>
+                                    <td>{{ category.total_items }}</td>
+                                    <td>{{ category.revenue }} CZK</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No category sales data available yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sales by Merchandiser by Month -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Sales by Merchandiser by Month</h5>
+        </div>
+        <div class="card-body">
+            {% if sales_by_merchandiser_by_month %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Merchandiser</th>
+                                <th>Items Sold</th>
+                                <th>Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in sales_by_merchandiser_by_month %}
+                                <tr>
+                                    <td>{{ entry.month|date:"F Y" }}</td>
+                                    <td>{{ entry.item__merchandiser__email }}</td>
+                                    <td>{{ entry.total_items }}</td>
+                                    <td>{{ entry.revenue }} CZK</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No monthly merchandiser sales data available yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{% url 'admin:index' %}" class="btn btn-primary">Back to Admin</a>
+    </div>
+</div>
+{% endblock %}

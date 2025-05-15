@@ -1,13 +1,15 @@
 from django.template.loader import render_to_string
 from django.views import View
 # Import UpdateView
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, FormView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, FormView, TemplateView
 from django.contrib.auth import get_user_model
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.utils import timezone
 from django.http import HttpResponseRedirect
+from django.db.models import Count, Sum, F, Q
+from django.db.models.functions import TruncMonth, TruncDay
 
 from ufo_shop import forms
 from ufo_shop.models import Item, Category, Picture, Order, OrderItem, BANK_ACCOUNT
@@ -448,3 +450,159 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
         ).exclude(
             status=Order.Status.IN_CART
         ).order_by('-created_at')
+
+
+class MerchandiserStatsView(LoginRequiredMixin, TemplateView):
+    """View to display statistics for merchandisers about their sold items"""
+    template_name = 'ufo_shop/merchandiser_stats.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        # Check if user is a merchandiser
+        if not request.user.is_merchandiser:
+            messages.error(request, "You need to be a merchandiser to access this page.")
+            return redirect('home')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        merchandiser = self.request.user
+
+        # Get all completed orders containing items from this merchandiser
+        # We consider PAID, SHIPPED, and FULFILLED statuses as completed
+        completed_statuses = [Order.Status.PAID, Order.Status.SHIPPED, Order.Status.FULFILLED]
+
+        # Get all order items for this merchandiser's items with completed orders
+        order_items = OrderItem.objects.filter(
+            item__merchandiser=merchandiser,
+            order__status__in=completed_statuses
+        ).select_related('item', 'order')
+
+        # Total sales
+        total_sales = order_items.aggregate(
+            total_items=Sum('amount'),
+            total_revenue=Sum(F('amount') * F('item__price'))
+        )
+
+        # Top selling items
+        top_items = order_items.values(
+            'item__id', 'item__name'
+        ).annotate(
+            total_sold=Sum('amount'),
+            revenue=Sum(F('amount') * F('item__price'))
+        ).order_by('-total_sold')[:10]
+
+        # Sales over time (by month)
+        sales_by_month = order_items.annotate(
+            month=TruncMonth('order__created_at')
+        ).values('month').annotate(
+            total_items=Sum('amount'),
+            revenue=Sum(F('amount') * F('item__price'))
+        ).order_by('month')
+
+        # Recent sales
+        recent_sales = order_items.order_by('-order__created_at')[:10]
+
+        context.update({
+            'total_sales': total_sales,
+            'top_items': top_items,
+            'sales_by_month': sales_by_month,
+            'recent_sales': recent_sales,
+        })
+
+        return context
+
+
+class AdminStatsView(UserPassesTestMixin, TemplateView):
+    """View to display global statistics for admin users"""
+    template_name = 'ufo_shop/admin_stats.html'
+
+    def test_func(self):
+        # Only allow superusers to access this view
+        return self.request.user.is_superuser
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Get sort parameter from request
+        sort_by = self.request.GET.get('sort_by', 'revenue')
+        sort_order = self.request.GET.get('sort_order', 'desc')
+
+        # Determine sort field and direction
+        sort_field = '-revenue' if sort_by == 'revenue' and sort_order == 'desc' else 'revenue'
+        if sort_by == 'items':
+            sort_field = '-total_items' if sort_order == 'desc' else 'total_items'
+        elif sort_by == 'merchandiser':
+            sort_field = '-item__merchandiser__email' if sort_order == 'desc' else 'item__merchandiser__email'
+
+        # Get all completed orders
+        completed_statuses = [Order.Status.PAID, Order.Status.SHIPPED, Order.Status.FULFILLED]
+
+        # Get all order items with completed orders
+        order_items = OrderItem.objects.filter(
+            order__status__in=completed_statuses
+        ).select_related('item', 'order')
+
+        # Global total sales
+        total_sales = order_items.aggregate(
+            total_items=Sum('amount'),
+            total_revenue=Sum(F('amount') * F('item__price')),
+            total_merchandisers=Count('item__merchandiser', distinct=True)
+        )
+
+        # Top selling items globally
+        top_items = order_items.values(
+            'item__id', 'item__name', 'item__merchandiser__email'
+        ).annotate(
+            total_sold=Sum('amount'),
+            revenue=Sum(F('amount') * F('item__price'))
+        ).order_by('-total_sold')[:10]
+
+        # Top merchandisers
+        top_merchandisers = order_items.values(
+            'item__merchandiser__id', 'item__merchandiser__email', 'item__merchandiser__first_name', 
+            'item__merchandiser__last_name'
+        ).annotate(
+            total_items=Sum('amount'),
+            revenue=Sum(F('amount') * F('item__price')),
+            unique_items=Count('item', distinct=True)
+        ).order_by(sort_field)[:10]
+
+        # Sales over time (by month)
+        sales_by_month = order_items.annotate(
+            month=TruncMonth('order__created_at')
+        ).values('month').annotate(
+            total_items=Sum('amount'),
+            revenue=Sum(F('amount') * F('item__price')),
+            merchandiser_count=Count('item__merchandiser', distinct=True)
+        ).order_by('month')
+
+        # Sales by category
+        sales_by_category = order_items.values(
+            'item__category__name'
+        ).annotate(
+            total_items=Sum('amount'),
+            revenue=Sum(F('amount') * F('item__price'))
+        ).order_by('-revenue')
+
+        # Sales by merchandiser by month
+        sales_by_merchandiser_by_month = order_items.annotate(
+            month=TruncMonth('order__created_at')
+        ).values(
+            'month', 'item__merchandiser__email'
+        ).annotate(
+            total_items=Sum('amount'),
+            revenue=Sum(F('amount') * F('item__price'))
+        ).order_by('month', '-revenue')
+
+        context.update({
+            'total_sales': total_sales,
+            'top_items': top_items,
+            'top_merchandisers': top_merchandisers,
+            'sales_by_month': sales_by_month,
+            'sales_by_category': sales_by_category,
+            'sales_by_merchandiser_by_month': sales_by_merchandiser_by_month,
+            'sort_by': sort_by,
+            'sort_order': sort_order,
+        })
+
+        return context

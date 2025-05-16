@@ -6,8 +6,100 @@
 {% endblock %}
 
 {% block content %}
-<div class="container text-center">
-    <h1>{% trans "Welcome to the Shop" %}</h1>
-    <p>{% trans "Start exploring our amazing products!" %}</p>
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1>{% trans "Welcome to the Shop" %}</h1>
+            <p>{% trans "Start exploring our amazing products!" %}</p>
+        </div>
+    </div>
+
+    <!-- Top Sellers Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="mb-4">{% trans "Top Sellers" %}</h2>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for item in top_items %}
+                    <div class="col">
+                        <div class="card h-100">
+                            {% if item.pictures.first %}
+                                {% if item.pictures.first.thumbnail %}
+                                    <img src="{{ item.pictures.first.thumbnail.url }}" class="card-img-top" alt="{{ item.name }}">
+                                {% elif item.pictures.first.square_image %}
+                                    <img src="{{ item.pictures.first.square_image.url }}" class="card-img-top" alt="{{ item.name }}">
+                                {% endif %}
+                            {% else %}
+                                <div class="bg-light text-center p-5">
+                                    <span class="text-muted">{% trans "No image available" %}</span>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ item.name }}</h5>
+                                <p class="card-text">{{ item.short_description }}</p>
+                                <p class="card-text"><strong>{{ item.price }} CZK</strong></p>
+                                <a href="{% url 'item-detail' item.id %}" class="btn btn-primary">{% trans "View Details" %}</a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12">
+                        <p class="text-center">{% trans "No items available." %}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- News Carousel Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="mb-4">{% trans "Latest News" %}</h2>
+            {% if latest_news %}
+                <div id="newsCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-indicators">
+                        {% for news in latest_news %}
+                            <button type="button" data-bs-target="#newsCarousel" data-bs-slide-to="{{ forloop.counter0 }}" 
+                                {% if forloop.first %}class="active"{% endif %} aria-label="Slide {{ forloop.counter }}"></button>
+                        {% endfor %}
+                    </div>
+                    <div class="carousel-inner">
+                        {% for news in latest_news %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                {% if news.image %}
+                                    <img src="{{ news.image.url }}" class="d-block w-100" alt="{{ news.title }}">
+                                {% else %}
+                                    <div class="bg-light text-center p-5" style="height: 300px;">
+                                        <span class="text-muted">{% trans "No image available" %}</span>
+                                    </div>
+                                {% endif %}
+                                <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-3">
+                                    <h5>{{ news.title }}</h5>
+                                    <p>{{ news.content|truncatewords:30 }}</p>
+                                    <p class="text-muted small">{{ news.published_at|date:"F j, Y" }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#newsCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#newsCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            {% else %}
+                <p class="text-center">{% trans "No news available." %}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <a href="{% url 'shop' %}" class="btn btn-lg btn-success">{% trans "Browse All Products" %}</a>
+        </div>
+    </div>
 </div>
 {% endblock %}

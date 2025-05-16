@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.http import HttpResponseRedirect
 from django.db.models import Count, Sum, F, Q
+from ufo_shop.models import News
 from django.db.models.functions import TruncMonth, TruncDay
 
 from ufo_shop import forms
@@ -70,7 +71,19 @@ class MerchandiserSignupView(LoginRequiredMixin,View):
 
 class HomeView(View):
     def get(self, request, *args, **kwargs):
-        return render(request, 'ufo_shop/home.html')
+        # Get top selling items
+        # We'll use OrderItem to find the most sold items
+        top_items = Item.objects.filter(is_active=True).annotate(
+            total_sold=Count('orderitem')
+        ).order_by('-total_sold')[:6]  # Get top 6 items
+
+        # Get latest news
+        latest_news = News.objects.filter(is_active=True).order_by('-published_at')[:5]  # Get latest 5 news items
+
+        return render(request, 'ufo_shop/home.html', {
+            'top_items': top_items,
+            'latest_news': latest_news,
+        })
 
 
 class ItemListView(ListView):

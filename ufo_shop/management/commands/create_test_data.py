@@ -418,3 +418,38 @@ class Command(BaseCommand):
             amount=1,
             pickup_location=merch_location2
         ))
+
+        ###############################################################################
+        # Create some News
+        ###############################################################################
+        decorate_model_creation(News)
+
+        news1 = create_shit(News, 'New Tournament Announced', dict(
+            title='New Tournament Announced',
+            content='We are excited to announce our upcoming summer tournament! Join us for a weekend of fun, competition, and community. Registration opens next week.',
+            is_active=True
+        ))
+
+        news2 = create_shit(News, 'New Merchandise Available', dict(
+            title='New Merchandise Available',
+            content='Check out our latest merchandise collection! We have added new t-shirts, discs, and accessories to our shop. Limited quantities available, so get yours before they\'re gone!',
+            is_active=True
+        ))
+
+        news3 = create_shit(News, 'Training Camp Registration', dict(
+            title='Training Camp Registration',
+            content='Registration for our annual training camp is now open! This year\'s camp will focus on advanced throwing techniques and strategic gameplay. Perfect for players of all levels.',
+            is_active=True
+        ))
+
+        news4 = create_shit(News, 'Community Cleanup Event', dict(
+            title='Community Cleanup Event',
+            content='Join us this Saturday for our community cleanup event at the local park. Let\'s give back to the community that supports our sport! Refreshments will be provided.',
+            is_active=True
+        ))
+
+        news5 = create_shit(News, 'Team Tryouts', dict(
+            title='Team Tryouts',
+            content='Tryouts for the competitive team will be held next month. We\'re looking for dedicated players who want to represent our club at national tournaments. See the details on our website.',
+            is_active=True
+        ))

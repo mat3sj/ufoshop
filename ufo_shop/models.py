@@ -373,3 +373,19 @@ class Picture(models.Model):
             if self.pk and update_fields:
                 kwargs['update_fields'] = update_fields
                 super().save(*args, **kwargs)
+
+
+class News(models.Model):
+    title = models.CharField("Title", max_length=200)
+    content = models.TextField("Content")
+    image = models.ImageField("Image", upload_to='news_images/', blank=True, null=True)
+    published_at = models.DateTimeField("Published At", auto_now_add=True)
+    is_active = models.BooleanField("Active", default=True)
+
+    class Meta:
+        verbose_name = "News"
+        verbose_name_plural = "News"
+        ordering = ['-published_at']
+
+    def __str__(self):
+        return self.title

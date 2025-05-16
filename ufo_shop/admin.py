@@ -288,3 +288,21 @@ class PictureAdmin(admin.ModelAdmin):
                               messages.SUCCESS)
 
     create_square_image_action.short_description = "Create Square Image(s)"
+
+
+@admin.register(News)
+class NewsAdmin(admin.ModelAdmin):
+    list_display = ('title', 'published_at', 'is_active')
+    list_filter = ('is_active', 'published_at')
+    search_fields = ('title', 'content')
+    ordering = ('-published_at',)
+
+    def image_preview(self, obj):
+        if obj.image:
+            return mark_safe(f'<img src="{obj.image.url}" width="100" />')
+        return "No image"
+
+    image_preview.short_description = 'Image Preview'
+
+    readonly_fields = ('image_preview',)
+    fields = ('title', 'content', 'image', 'image_preview', 'is_active')

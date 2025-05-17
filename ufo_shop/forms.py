@@ -80,6 +80,22 @@ class ItemForm(forms.ModelForm):
         required=False  # Make it optional if items can be created without images initially
     )
 
+    # Fields for color variants
+    has_color_variants = forms.BooleanField(
+        label="This item has color variants",
+        required=False,
+        initial=False,
+        help_text="Check this if you want to add color variants for this item"
+    )
+
+    # For creating a new variant of an existing item
+    is_variant_of = forms.ModelChoiceField(
+        queryset=Item.objects.filter(is_variant=False),
+        label="This is a color variant of",
+        required=False,
+        help_text="Select the parent item if this is a color variant"
+    )
+
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
@@ -95,6 +111,47 @@ class ItemForm(forms.ModelForm):
                 models.Q(merchandiser=self.user) | models.Q(is_universal=True)
             )
 
+            # Filter is_variant_of to show only items belonging to the user
+            self.fields['is_variant_of'].queryset = Item.objects.filter(
+                merchandiser=self.user,
+                is_variant=False
+            )
+
+        # If this is an existing item that is a variant, hide the has_color_variants field
+        if self.instance and self.instance.pk and self.instance.is_variant:
+            self.fields['has_color_variants'].widget = forms.HiddenInput()
+            self.fields['has_color_variants'].initial = False
+
+        # If this is an existing item with variants, set has_color_variants to True
+        if self.instance and self.instance.pk and self.instance.has_variants():
+            self.fields['has_color_variants'].initial = True
+
+        # If this is an existing variant, set is_variant_of to the parent item
+        if self.instance and self.instance.pk and self.instance.is_variant and self.instance.parent_item:
+            self.fields['is_variant_of'].initial = self.instance.parent_item
+
+        # Build the layout based on whether this is a variant or not
+        color_fields = []
+        if self.instance and self.instance.pk and self.instance.is_variant:
+            # This is an existing variant, show color field
+            color_fields = [
+                Row(
+                    Column('color', css_class='form-group col-md-6'),
+                    Column('is_variant_of', css_class='form-group col-md-6'),
+                ),
+            ]
+        else:
+            # This is a new item or an existing non-variant item
+            color_fields = [
+                Row(
+                    Column('has_color_variants', css_class='form-group col-md-6'),
+                    Column('color', css_class='form-group col-md-6', css_id='color_field'),
+                ),
+                Row(
+                    Column('is_variant_of', css_class='form-group col-md-12'),
+                ),
+            ]
+
         self.helper.layout = Layout(
             Fieldset(
                 'Item Details',
@@ -106,6 +163,7 @@ class ItemForm(forms.ModelForm):
                     Column('amount', css_class='form-group col-md-6'),
                     Column('locations', css_class='form-group col-md-6'),
                 ),
+                *color_fields,
                 'short_description',
                 'description',
                 'category',
@@ -117,12 +175,25 @@ class ItemForm(forms.ModelForm):
                 css_class='text-center mt-3'
             )
         )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        is_variant_of = cleaned_data.get('is_variant_of')
+        color = cleaned_data.get('color')
+
+        # If this is a variant, color is required
+        if is_variant_of and not color:
+            self.add_error('color', 'Color is required for variants')
+
+        return cleaned_data
+
     class Meta:
         model = Item
         # List all fields EXCEPT any old image field that was directly on Item
         fields = [
             'name', 'price', 'amount', 'locations',
-            'short_description', 'description', 'category', 'is_active'
+            'short_description', 'description', 'category', 'is_active',
+            'color'  # Add color field
             # DO NOT include 'pictures' or any single ImageField previously on Item here
         ]
 

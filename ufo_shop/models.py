@@ -306,8 +306,27 @@ class Picture(models.Model):
     def __str__(self):
         # Provide a more descriptive string representation
         if self.item:
-            return f"Picture for {self.item.name} ({os.path.basename(self.picture.name)})"
-        return os.path.basename(self.picture.name)
+            return f"Picture for {self.item.name} ({os.path.basename(self.picture.name if self.picture else (self.thumbnail.name if self.thumbnail else self.square_image.name))})"
+        return os.path.basename(self.picture.name if self.picture else (self.thumbnail.name if self.thumbnail else self.square_image.name))
+
+    def delete(self, *args, **kwargs):
+        # Store paths to image files
+        thumbnail_path = self.thumbnail.path if self.thumbnail else None
+        square_image_path = self.square_image.path if self.square_image else None
+        picture_path = self.picture.path if self.picture else None
+
+        # Delete the model instance
+        super().delete(*args, **kwargs)
+
+        # Delete the image files from storage
+        if thumbnail_path and os.path.exists(thumbnail_path):
+            os.remove(thumbnail_path)
+
+        if square_image_path and os.path.exists(square_image_path):
+            os.remove(square_image_path)
+
+        if picture_path and os.path.exists(picture_path):
+            os.remove(picture_path)
 
     def _check_if_derivatives_needed(self):
         if self.pk:
@@ -340,9 +359,10 @@ class Picture(models.Model):
         base_name, ext = os.path.splitext(img_name)
         square_img.save(square_io, format=img.format, quality=90)
         square_filename = f"{base_name}_sq{SQUARE_IMAGE_SIZE}{ext}"
-        self.square_image.save(square_filename, ContentFile(square_io.getvalue()), save=False)
+        # self.square_image=square_img
+        # self.save()
+        self.square_image.save(square_filename, ContentFile(square_io.getvalue()), save=True)
 
-        return square_img
 
     def generate_thumbnail(self):
         img = PilImage.open(self.picture)
@@ -357,7 +377,7 @@ class Picture(models.Model):
         thumb_io = BytesIO()
         thumb_img.save(thumb_io, format=img.format, quality=85)
         thumb_filename = f"{base_name}_thumb{ext}"
-        self.thumbnail.save(thumb_filename, ContentFile(thumb_io.getvalue()), save=False)
+        self.thumbnail.save(thumb_filename, ContentFile(thumb_io.getvalue()), save=True)
 
     def resize_large_image(self):
         """Resize image if it's larger than 2MB"""
@@ -385,50 +405,84 @@ class Picture(models.Model):
 
             # Replace the original image with the resized one
             img_name = os.path.basename(self.picture.name)
-            self.picture.save(img_name, ContentFile(img_io.getvalue()), save=False)
+            self.picture.save(img_name, ContentFile(img_io.getvalue()), save=True)
 
             return True
         return False
 
     def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Store original force_insert and force_update values
+        force_insert = kwargs.pop('force_insert', False)
+        force_update = kwargs.pop('force_update', False)
+
         generate_derivatives = self._check_if_derivatives_needed()
+        # is_new_instance = not self.pk
+        if not self.thumbnail:
+            self.generate_thumbnail()
+        if not self.square_image:
+            self.generate_square_image()
 
-        # First save to get a pk if this is a new instance
-        if not self.pk:
-            super().save(*args, **kwargs)
-
-        # Check and resize large images
-        resized = False
-        if generate_derivatives and self.picture:
-            resized = self.resize_large_image()
-
-        # Generate derivatives if needed
-        save_needed_after_derivatives = False
-        if generate_derivatives and self.picture:
-            try:
-                self.generate_square_image()
-                self.generate_thumbnail()
-                save_needed_after_derivatives = True
-            except Exception as e:
-                print(f"Error processing image {self.picture.name}: {e}")
-                self.thumbnail = None
-                self.square_image = None
-                save_needed_after_derivatives = True
-
-        # Save again if derivatives were generated or image was resized
-        if save_needed_after_derivatives or resized:
-            update_fields = ['thumbnail', 'square_image']
-            if resized:
-                update_fields.append('picture')
-
-            update_fields = [field for field in update_fields if getattr(self, field) is not None or field == 'picture']
-
-            if update_fields:
-                kwargs['update_fields'] = update_fields
-                super().save(*args, **kwargs)
-        elif not generate_derivatives and not self.pk:
-            # If we're not generating derivatives and this is not a new instance
-            super().save(*args, **kwargs)
+        # # First save to get a pk if this is a new instance
+        # if is_new_instance:
+        #     # For new instances, always use force_insert=True
+        #     super().save(*args, **{**kwargs, 'force_insert': True})
+        #
+        # # Check and resize large images
+        # resized = False
+        # if generate_derivatives and self.picture:
+        #     resized = self.resize_large_image()
+        #
+        # # Generate derivatives if needed
+        # save_needed_after_derivatives = False
+        # derivatives_success = False
+        # if generate_derivatives and self.picture:
+        #     try:
+        #         self.generate_square_image()
+        #         self.generate_thumbnail()
+        #         save_needed_after_derivatives = True
+        #         derivatives_success = True
+        #     except Exception as e:
+        #         print(f"Error processing image {self.picture.name}: {e}")
+        #         self.thumbnail = None
+        #         self.square_image = None
+        #         save_needed_after_derivatives = True
+        #
+        # # For subsequent saves, we're always updating (not inserting)
+        # if not is_new_instance:
+        #     # Save again if derivatives were generated or image was resized
+        #     if save_needed_after_derivatives or resized:
+        #         update_fields = ['thumbnail', 'square_image']
+        #         if resized:
+        #             update_fields.append('picture')
+        #
+        #         update_fields = [field for field in update_fields if getattr(self, field) is not None or field == 'picture']
+        #
+        #         if update_fields:
+        #             # For updates, use update_fields and force_update=True
+        #             super().save(*args, **{**kwargs, 'update_fields': update_fields, 'force_update': True})
+        #     elif not generate_derivatives:
+        #         # If we're not generating derivatives and this is not a new instance
+        #         super().save(*args, **{**kwargs, 'force_update': True})
+        #
+        # # Delete the original large image if derivatives were successfully created
+        # if derivatives_success and self.thumbnail and self.square_image:
+        #     # Store the path to the original image
+        #     original_path = self.picture.path
+        #
+        #     # Clear the picture field in the model
+        #     self.picture = None
+        #
+        #     # Save the model to update the database
+        #     if is_new_instance:
+        #         super().save(*args, **{**kwargs, 'update_fields': ['picture'], 'force_update': True})
+        #     else:
+        #         super().save(*args, **{**kwargs, 'update_fields': ['picture'], 'force_update': True})
+        #
+        #     # Delete the file from storage if it exists
+        #     if os.path.exists(original_path):
+        #         os.remove(original_path)
 
 
 class News(models.Model):

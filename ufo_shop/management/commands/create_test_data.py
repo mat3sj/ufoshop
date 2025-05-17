@@ -36,7 +36,8 @@ class Command(BaseCommand):
                 'email': settings.SUPERUSER_EMAIL,
                 'is_staff': True,
                 'is_superuser': True,
-                'is_active': True
+                'is_active': True,
+                'is_merchandiser': True,
             }
         )
         if created:

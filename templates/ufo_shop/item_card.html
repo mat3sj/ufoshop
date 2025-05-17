@@ -2,8 +2,21 @@
 <div class="col-md-4 mb-4">
   <a href="{% url 'item-detail' item.id %}" class="text-decoration-none">
     <div class="card h-100">
-      <img src="{{ item.image.url|default:'#' }}" class="card-img-top" alt="{{ item.name }}"
-           style="height: 200px; object-fit: cover;">
+      {% if item.pictures.first %}
+        {% if item.pictures.first.square_image %}
+          <img src="{{ item.pictures.first.square_image.url }}" class="card-img-top" alt="{{ item.name }}" style="height: 200px; object-fit: cover;">
+        {% elif item.pictures.first.thumbnail %}
+          <img src="{{ item.pictures.first.thumbnail.url }}" class="card-img-top" alt="{{ item.name }}" style="height: 200px; object-fit: cover;">
+        {% else %}
+          <div class="bg-light text-center" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+            <p>{% trans "No image" %}</p>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="bg-light text-center" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+          <p>{% trans "No image" %}</p>
+        </div>
+      {% endif %}
       <div class="card-body">
         <h5 class="card-title">{{ item.name }}</h5>
         <p class="card-text"><small class="text-muted">
@@ -11,7 +24,7 @@
         </small></p>
         <p class="card-text">{{ item.short_description }}</p>
         <p class="card-text"><small class="text-muted">
-          <strong>Created By:</strong> {{ item.merchandiser.username }}
+          <strong>Created By:</strong> {{ item.merchandiser.email }}
         </small></p>
       </div>
     </div>

@@ -42,7 +42,7 @@
           <div class="card-body">
             <div class="row">
               <div class="col-md-4">
-                {% if item_group.parent.pictures.first %}
+                {% if item_group.parent.pictures.first and item_group.parent.pictures.first.thumbnail %}
                   <img src="{{ item_group.parent.pictures.first.thumbnail.url }}" class="img-fluid rounded" alt="{{ item_group.parent.name }}">
                 {% else %}
                   <div class="bg-light p-5 text-center">

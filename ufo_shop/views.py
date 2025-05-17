@@ -242,7 +242,9 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
             # Inherit some properties from parent
             form.instance.short_description = is_variant_of.short_description
             form.instance.description = is_variant_of.description
-            form.instance.category = is_variant_of.category
+            self.object = form.save()
+            self.object.category.set(is_variant_of.category.all())
+
 
         # Save the Item instance
         self.object = form.save()
@@ -258,13 +260,16 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
             parent_pictures = Picture.objects.filter(item=is_variant_of)
             for parent_pic in parent_pictures:
                 # Create a copy of the parent picture for this variant
+                # Only copy the thumbnail and square_image, as the original picture may have been deleted
                 new_pic = Picture(
                     item=self.object,
                     user=self.request.user,
-                    picture=parent_pic.picture,
                     thumbnail=parent_pic.thumbnail,
                     square_image=parent_pic.square_image
                 )
+                # Only set the picture field if it exists in the parent
+                if parent_pic.picture:
+                    new_pic.picture = parent_pic.picture
                 new_pic.save()
 
         # Use the success_url defined on the class
@@ -363,13 +368,16 @@ class ItemUpdateView(LoginRequiredMixin, UpdateView):
             parent_pictures = Picture.objects.filter(item=is_variant_of)
             for parent_pic in parent_pictures:
                 # Create a copy of the parent picture for this variant
+                # Only copy the thumbnail and square_image, as the original picture may have been deleted
                 new_pic = Picture(
                     item=self.object,
                     user=self.request.user,
-                    picture=parent_pic.picture,
                     thumbnail=parent_pic.thumbnail,
                     square_image=parent_pic.square_image
                 )
+                # Only set the picture field if it exists in the parent
+                if parent_pic.picture:
+                    new_pic.picture = parent_pic.picture
                 new_pic.save()
 
         # Use the success_url defined on the class

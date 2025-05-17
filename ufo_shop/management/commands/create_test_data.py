@@ -133,10 +133,11 @@ class Command(BaseCommand):
         # Create some Items
         ###############################################################################
         decorate_model_creation(Item)
+        # Create parent t-shirt item
         t_shirt = create_shit(Item, 'Tričko s tučňákem', dict(
             name='Tričko s tučňákem',
             merchandiser=admin,
-            amount=88,
+            amount=30,
             price=499,
             short_description='Kvalitní bavlněné tričko s potiskem tučňáka',
             is_active=True,
@@ -144,6 +145,52 @@ class Command(BaseCommand):
         ))
         t_shirt.category.add(clothes_category)
         t_shirt.locations.add(universal_location, admin_location1, admin_location2)
+
+        # Create color variants for t-shirt
+        t_shirt_red = create_shit(Item, 'Tričko s tučňákem - Červené', dict(
+            name='Tričko s tučňákem',
+            merchandiser=admin,
+            amount=20,
+            price=499,
+            short_description='Kvalitní bavlněné tričko s potiskem tučňáka',
+            is_active=True,
+            description='Pohodlné bavlněné tričko s roztomilým potiskem tučňáka. Vhodné pro každodenní nošení. K dispozici ve všech velikostech.',
+            parent_item=t_shirt,
+            is_variant=True,
+            color='Červená'
+        ))
+        t_shirt_red.category.add(clothes_category)
+        t_shirt_red.locations.add(universal_location, admin_location1, admin_location2)
+
+        t_shirt_blue = create_shit(Item, 'Tričko s tučňákem - Modré', dict(
+            name='Tričko s tučňákem',
+            merchandiser=admin,
+            amount=18,
+            price=499,
+            short_description='Kvalitní bavlněné tričko s potiskem tučňáka',
+            is_active=True,
+            description='Pohodlné bavlněné tričko s roztomilým potiskem tučňáka. Vhodné pro každodenní nošení. K dispozici ve všech velikostech.',
+            parent_item=t_shirt,
+            is_variant=True,
+            color='Modrá'
+        ))
+        t_shirt_blue.category.add(clothes_category)
+        t_shirt_blue.locations.add(universal_location, admin_location1, admin_location2)
+
+        t_shirt_green = create_shit(Item, 'Tričko s tučňákem - Zelené', dict(
+            name='Tričko s tučňákem',
+            merchandiser=admin,
+            amount=20,
+            price=499,
+            short_description='Kvalitní bavlněné tričko s potiskem tučňáka',
+            is_active=True,
+            description='Pohodlné bavlněné tričko s roztomilým potiskem tučňáka. Vhodné pro každodenní nošení. K dispozici ve všech velikostech.',
+            parent_item=t_shirt,
+            is_variant=True,
+            color='Zelená'
+        ))
+        t_shirt_green.category.add(clothes_category)
+        t_shirt_green.locations.add(universal_location, admin_location1, admin_location2)
 
         long_socks = create_shit(Item, 'Fešácký nákolenky', dict(
             name='Fešácký nákolenky',
@@ -169,10 +216,11 @@ class Command(BaseCommand):
         frisbee.category.add(gear_category)
         frisbee.locations.add(universal_location, admin_location1)
 
+        # Create parent shorts item
         shorts = create_shit(Item, 'Sportovní šortky', dict(
             name='Sportovní šortky',
             merchandiser=test_merchandiser,
-            amount=45,
+            amount=15,
             price=599,
             short_description='Lehké prodyšné šortky',
             is_active=True,
@@ -180,6 +228,52 @@ class Command(BaseCommand):
         ))
         shorts.category.add(clothes_category)
         shorts.locations.add(universal_location, merch_location2)
+
+        # Create color variants for shorts
+        shorts_black = create_shit(Item, 'Sportovní šortky - Černé', dict(
+            name='Sportovní šortky',
+            merchandiser=test_merchandiser,
+            amount=10,
+            price=599,
+            short_description='Lehké prodyšné šortky',
+            is_active=True,
+            description='Pohodlné sportovní šortky ideální pro Ultimate frisbee. Rychleschnoucí materiál.',
+            parent_item=shorts,
+            is_variant=True,
+            color='Černá'
+        ))
+        shorts_black.category.add(clothes_category)
+        shorts_black.locations.add(universal_location, merch_location2)
+
+        shorts_navy = create_shit(Item, 'Sportovní šortky - Námořnická', dict(
+            name='Sportovní šortky',
+            merchandiser=test_merchandiser,
+            amount=10,
+            price=599,
+            short_description='Lehké prodyšné šortky',
+            is_active=True,
+            description='Pohodlné sportovní šortky ideální pro Ultimate frisbee. Rychleschnoucí materiál.',
+            parent_item=shorts,
+            is_variant=True,
+            color='Námořnická'
+        ))
+        shorts_navy.category.add(clothes_category)
+        shorts_navy.locations.add(universal_location, merch_location2)
+
+        shorts_white = create_shit(Item, 'Sportovní šortky - Bílé', dict(
+            name='Sportovní šortky',
+            merchandiser=test_merchandiser,
+            amount=10,
+            price=599,
+            short_description='Lehké prodyšné šortky',
+            is_active=True,
+            description='Pohodlné sportovní šortky ideální pro Ultimate frisbee. Rychleschnoucí materiál.',
+            parent_item=shorts,
+            is_variant=True,
+            color='Bílá'
+        ))
+        shorts_white.category.add(clothes_category)
+        shorts_white.locations.add(universal_location, merch_location2)
 
         cap = create_shit(Item, 'Kšiltovka UFO', dict(
             name='Kšiltovka UFO',
@@ -205,10 +299,11 @@ class Command(BaseCommand):
         water_bottle.category.add(gear_category)
         water_bottle.locations.add(universal_location, merch_location1)
 
+        # Create parent sweatshirt item
         sweatshirt = create_shit(Item, 'Mikina UFO', dict(
             name='Mikina UFO',
             merchandiser=admin,
-            amount=40,
+            amount=10,
             price=899,
             short_description='Teplá mikina s kapucí',
             is_active=True,
@@ -216,6 +311,52 @@ class Command(BaseCommand):
         ))
         sweatshirt.category.add(clothes_category)
         sweatshirt.locations.add(universal_location, admin_location1, admin_location2)
+
+        # Create color variants for sweatshirt
+        sweatshirt_gray = create_shit(Item, 'Mikina UFO - Šedá', dict(
+            name='Mikina UFO',
+            merchandiser=admin,
+            amount=10,
+            price=899,
+            short_description='Teplá mikina s kapucí',
+            is_active=True,
+            description='Pohodlná mikina s kapucí a klokaní kapsou. Logo UFO na přední straně.',
+            parent_item=sweatshirt,
+            is_variant=True,
+            color='Šedá'
+        ))
+        sweatshirt_gray.category.add(clothes_category)
+        sweatshirt_gray.locations.add(universal_location, admin_location1, admin_location2)
+
+        sweatshirt_black = create_shit(Item, 'Mikina UFO - Černá', dict(
+            name='Mikina UFO',
+            merchandiser=admin,
+            amount=10,
+            price=899,
+            short_description='Teplá mikina s kapucí',
+            is_active=True,
+            description='Pohodlná mikina s kapucí a klokaní kapsou. Logo UFO na přední straně.',
+            parent_item=sweatshirt,
+            is_variant=True,
+            color='Černá'
+        ))
+        sweatshirt_black.category.add(clothes_category)
+        sweatshirt_black.locations.add(universal_location, admin_location1, admin_location2)
+
+        sweatshirt_purple = create_shit(Item, 'Mikina UFO - Fialová', dict(
+            name='Mikina UFO',
+            merchandiser=admin,
+            amount=10,
+            price=899,
+            short_description='Teplá mikina s kapucí',
+            is_active=True,
+            description='Pohodlná mikina s kapucí a klokaní kapsou. Logo UFO na přední straně.',
+            parent_item=sweatshirt,
+            is_variant=True,
+            color='Fialová'
+        ))
+        sweatshirt_purple.category.add(clothes_category)
+        sweatshirt_purple.locations.add(universal_location, admin_location1, admin_location2)
 
         wristband = create_shit(Item, 'Potítko', dict(
             name='Potítko',
@@ -328,9 +469,10 @@ class Command(BaseCommand):
             user=test_user,
             status=Order.Status.IN_CART
         ))
+        # Use a color variant in the order
         order_item_3 = create_shit(OrderItem, 'Order item 3', dict(
             order=test_user_cart,
-            item=t_shirt,
+            item=t_shirt_red,  # Use the red variant instead of the parent
             amount=1,
             pickup_location=admin_location1
         ))
@@ -367,9 +509,10 @@ class Command(BaseCommand):
             contact_email=test_merchandiser.email,
             contact_phone=test_merchandiser.phone or '987654321'
         ))
+        # Use a color variant in the order
         order_item_7 = create_shit(OrderItem, 'Order item 7', dict(
             order=ordered2,
-            item=sweatshirt,
+            item=sweatshirt_black,  # Use the black variant instead of the parent
             amount=1,
             pickup_location=universal_location
         ))
@@ -412,9 +555,10 @@ class Command(BaseCommand):
             amount=1,
             pickup_location=admin_location2
         ))
+        # Add a new order item with shorts variant
         order_item_12 = create_shit(OrderItem, 'Order item 12', dict(
             order=fulfilled2,
-            item=beanie,
+            item=shorts_navy,  # Use the navy shorts variant
             amount=1,
             pickup_location=merch_location2
         ))

@@ -23,12 +23,32 @@
         <p class="lead mb-4">{{ item.description }}</p>
         <p class="h3 text-primary mb-4">{{ item.price }} {% trans "CZK" %}</p>
 
+        {% if color_variants %}
+        <div class="mb-4">
+          <h5>{% trans "Available Colors" %}:</h5>
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-outline-primary active" data-variant-id="{{ item.id }}" data-amount="{{ item.amount }}">
+              {% trans "Default" %}
+            </button>
+            {% for variant in color_variants %}
+            <button class="btn btn-outline-primary" data-variant-id="{{ variant.id }}" data-amount="{{ variant.amount }}" style="background-color: {{ variant.color }}; color: #fff;">
+              {{ variant.color }}
+            </button>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="mb-3">
+          <p class="mb-1">{% trans "Available" %}: <span id="item-amount">{{ item.amount }}</span></p>
+        </div>
+
         <div class="d-grid gap-2">
           {% if user.is_authenticated %}
-            <form method="post" action="{% url 'add_to_cart' %}">
+            <form method="post" action="{% url 'add_to_cart' %}" id="add-to-cart-form">
               {% csrf_token %}
               <input type="hidden" name="next" value="{{ request.path }}">
-              {{ add_to_cart_form.item_id }}
+              <input type="hidden" name="item_id" id="selected-variant-id" value="{{ item.id }}">
               <div class="input-group mb-3">
                 {{ add_to_cart_form.quantity }}
                 <button class="btn btn-success" type="submit">
@@ -75,4 +95,34 @@
       </div>
     {% endif %}
   </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get all color variant buttons
+    const colorButtons = document.querySelectorAll('[data-variant-id]');
+    const selectedVariantInput = document.getElementById('selected-variant-id');
+    const itemAmountDisplay = document.getElementById('item-amount');
+
+    // Add click event listener to each button
+    colorButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        // Remove active class from all buttons
+        colorButtons.forEach(btn => btn.classList.remove('active'));
+
+        // Add active class to clicked button
+        this.classList.add('active');
+
+        // Update the selected variant ID in the form
+        const variantId = this.getAttribute('data-variant-id');
+        selectedVariantInput.value = variantId;
+
+        // Update the available amount display
+        const amount = this.getAttribute('data-amount');
+        itemAmountDisplay.textContent = amount;
+      });
+    });
+  });
+</script>
 {% endblock %}

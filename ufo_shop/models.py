@@ -5,6 +5,7 @@ from django.core.files.base import ContentFile
 import os
 import qrcode
 import base64
+import math
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.moduledrawers import HorizontalBarsDrawer
 from qrcode.image.styles.moduledrawers.pil import RoundedModuleDrawer
@@ -72,13 +73,33 @@ class Item(models.Model):
     is_active = models.BooleanField("Active", default=True)
     created_at = models.DateTimeField("Created At", auto_now_add=True)
     updated_at = models.DateTimeField("Updated At", auto_now=True)
+    # For color variants grouping
+    parent_item = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, 
+                                   related_name='variants', verbose_name="Parent Item")
+    is_variant = models.BooleanField("Is Variant", default=False)
+    color = models.CharField("Color", max_length=50, blank=True, null=True)
 
     class Meta:
         verbose_name = "Item"
         verbose_name_plural = "Items"
 
     def __str__(self):
+        if self.color and self.is_variant:
+            return f"{self.name} - {self.color}"
         return self.name
+
+    def get_variants(self):
+        """Get all color variants for this item"""
+        if self.is_variant and self.parent_item:
+            # If this is a variant, get siblings from the parent
+            return self.parent_item.variants.all()
+        else:
+            # If this is a parent, get all variants
+            return self.variants.all()
+
+    def has_variants(self):
+        """Check if this item has color variants"""
+        return self.variants.exists()
 
 
 class Order(models.Model):
@@ -338,21 +359,52 @@ class Picture(models.Model):
         thumb_filename = f"{base_name}_thumb{ext}"
         self.thumbnail.save(thumb_filename, ContentFile(thumb_io.getvalue()), save=False)
 
+    def resize_large_image(self):
+        """Resize image if it's larger than 2MB"""
+        if not self.picture:
+            return
+
+        # Check file size (2MB = 2 * 1024 * 1024 bytes)
+        MAX_SIZE = 2 * 1024 * 1024
+        if self.picture.size > MAX_SIZE:
+            img = PilImage.open(self.picture)
+
+            # Calculate new dimensions while maintaining aspect ratio
+            width, height = img.size
+            ratio = min(1.0, math.sqrt(MAX_SIZE / self.picture.size))
+            new_width = int(width * ratio)
+            new_height = int(height * ratio)
+
+            # Resize the image
+            resized_img = img.resize((new_width, new_height), PilImage.Resampling.LANCZOS)
+
+            # Save resized image to buffer
+            img_io = BytesIO()
+            img_format = img.format if img.format else 'JPEG'
+            resized_img.save(img_io, format=img_format, quality=90)
+
+            # Replace the original image with the resized one
+            img_name = os.path.basename(self.picture.name)
+            self.picture.save(img_name, ContentFile(img_io.getvalue()), save=False)
+
+            return True
+        return False
+
     def save(self, *args, **kwargs):
         generate_derivatives = self._check_if_derivatives_needed()
 
-        save_needed_after_derivatives = False
-        if generate_derivatives and self.picture:
-            temp_skip_derivatives = not self.pk
-            if temp_skip_derivatives:
-                self.thumbnail = None
-                self.square_image = None
-            super().save(*args, **kwargs)
-            save_needed_after_derivatives = True
-        elif not generate_derivatives:
+        # First save to get a pk if this is a new instance
+        if not self.pk:
             super().save(*args, **kwargs)
 
-        if generate_derivatives and self.picture and not temp_skip_derivatives:
+        # Check and resize large images
+        resized = False
+        if generate_derivatives and self.picture:
+            resized = self.resize_large_image()
+
+        # Generate derivatives if needed
+        save_needed_after_derivatives = False
+        if generate_derivatives and self.picture:
             try:
                 self.generate_square_image()
                 self.generate_thumbnail()
@@ -363,16 +415,20 @@ class Picture(models.Model):
                 self.square_image = None
                 save_needed_after_derivatives = True
 
-        if save_needed_after_derivatives:
+        # Save again if derivatives were generated or image was resized
+        if save_needed_after_derivatives or resized:
             update_fields = ['thumbnail', 'square_image']
-            if generate_derivatives and not temp_skip_derivatives:
+            if resized:
                 update_fields.append('picture')
 
             update_fields = [field for field in update_fields if getattr(self, field) is not None or field == 'picture']
 
-            if self.pk and update_fields:
+            if update_fields:
                 kwargs['update_fields'] = update_fields
                 super().save(*args, **kwargs)
+        elif not generate_derivatives and not self.pk:
+            # If we're not generating derivatives and this is not a new instance
+            super().save(*args, **kwargs)
 
 
 class News(models.Model):

@@ -1,11 +1,44 @@
 {% extends 'ufo_shop/base.html' %}
 {% load crispy_forms_tags %} {# Load the crispy forms tags #}
+{% load i18n %}
 
 {% block content %}
-  <h2>{{ form_title }}</h2> {# Display the title passed from the view #}
-  <form method="post">
-    {% csrf_token %}
-    {% crispy form %}
-{#    <button type="submit" class="btn btn-primary">Save Item</button>#}
-  </form>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8 offset-md-2">
+        <h2 class="mb-4">{{ form_title }}</h2> {# Display the title passed from the view #}
+
+        {% if parent_item %}
+          <div class="card mb-4">
+            <div class="card-header bg-light">
+              <h5 class="mb-0">{% trans "Creating Color Variant For" %}</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4">
+                  {% if parent_item.pictures.first %}
+                    <img src="{{ parent_item.pictures.first.thumbnail.url }}" class="img-fluid rounded" alt="{{ parent_item.name }}">
+                  {% else %}
+                    <div class="bg-light p-5 text-center">
+                      <p>{% trans "No image available" %}</p>
+                    </div>
+                  {% endif %}
+                </div>
+                <div class="col-md-8">
+                  <h5>{{ parent_item.name }}</h5>
+                  <p><strong>{% trans "Price" %}:</strong> {{ parent_item.price }} {% trans "CZK" %}</p>
+                  <p><strong>{% trans "Description" %}:</strong> {{ parent_item.short_description }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          {% crispy form %}
+        </form>
+      </div>
+    </div>
+  </div>
 {% endblock %}

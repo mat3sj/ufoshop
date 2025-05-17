@@ -12,14 +12,87 @@
         <a href="{% url 'item-create' %}" class="btn btn-primary">{% trans "Add New Item" %}</a>
       </div>
     </div>
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-      {% for item in items %}
-        {% include "ufo_shop/item_card.html" with item=item %}
-      {% empty %}
-        <div class="col-12">
-          <p class="text-center">{% trans "No items available." %}</p>
+    {% if organized_items %}
+      {% for item_group in organized_items %}
+        <div class="card mb-4">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              {{ item_group.parent.name }}
+              {% if item_group.parent.is_variant %}
+                <span class="badge bg-secondary">{% trans "Variant" %}</span>
+              {% endif %}
+              {% if item_group.is_orphaned_variant %}
+                <span class="badge bg-warning">{% trans "Orphaned Variant" %}</span>
+              {% endif %}
+            </h5>
+            <div>
+              <a href="{% url 'item-edit' item_group.parent.id %}" class="btn btn-sm btn-outline-primary">
+                {% trans "Edit" %}
+              </a>
+              <a href="{% url 'item-detail' item_group.parent.id %}" class="btn btn-sm btn-outline-info">
+                {% trans "View" %}
+              </a>
+              {% if not item_group.parent.is_variant %}
+                <a href="{% url 'item-create' %}?is_variant_of={{ item_group.parent.id }}" class="btn btn-sm btn-outline-success">
+                  {% trans "Add Color Variant" %}
+                </a>
+              {% endif %}
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-4">
+                {% if item_group.parent.pictures.first %}
+                  <img src="{{ item_group.parent.pictures.first.thumbnail.url }}" class="img-fluid rounded" alt="{{ item_group.parent.name }}">
+                {% else %}
+                  <div class="bg-light p-5 text-center">
+                    <p>{% trans "No image available" %}</p>
+                  </div>
+                {% endif %}
+              </div>
+              <div class="col-md-8">
+                <p><strong>{% trans "Price" %}:</strong> {{ item_group.parent.price }} {% trans "CZK" %}</p>
+                <p><strong>{% trans "Amount" %}:</strong> {{ item_group.parent.amount }}</p>
+                <p><strong>{% trans "Description" %}:</strong> {{ item_group.parent.short_description }}</p>
+                {% if item_group.parent.color %}
+                  <p><strong>{% trans "Color" %}:</strong> {{ item_group.parent.color }}</p>
+                {% endif %}
+              </div>
+            </div>
+
+            {% if item_group.has_variants %}
+              <hr>
+              <h6>{% trans "Color Variants" %}:</h6>
+              <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for variant in item_group.variants %}
+                  <div class="col">
+                    <div class="card h-100">
+                      <div class="card-header" style="background-color: {{ variant.color }}; color: #fff;">
+                        {{ variant.color }}
+                      </div>
+                      <div class="card-body">
+                        <p><strong>{% trans "Amount" %}:</strong> {{ variant.amount }}</p>
+                        <div class="d-flex justify-content-between">
+                          <a href="{% url 'item-edit' variant.id %}" class="btn btn-sm btn-outline-primary">
+                            {% trans "Edit" %}
+                          </a>
+                          <a href="{% url 'item-detail' variant.id %}" class="btn btn-sm btn-outline-info">
+                            {% trans "View" %}
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
         </div>
       {% endfor %}
-    </div>
+    {% else %}
+      <div class="alert alert-info">
+        <p class="text-center">{% trans "No items available." %}</p>
+      </div>
+    {% endif %}
   </div>
 {% endblock %}

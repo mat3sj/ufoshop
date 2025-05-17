@@ -93,7 +93,9 @@ class ItemListView(ListView):
     paginate_by = 12
 
     def get_queryset(self):
-        queryset = super().get_queryset().filter(is_active=True)  # Only active items
+        # Only active items that are not variants (we'll show variants on the detail page)
+        queryset = super().get_queryset().filter(is_active=True, is_variant=False)
+
         category = self.request.GET.get('category')
         # user = self.request.GET.get('user')
 
@@ -120,10 +122,23 @@ class ItemDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        # If this is a variant, redirect to the parent item
+        if self.object.is_variant and self.object.parent_item:
+            # This is handled in get() method
+            pass
+
+        # Get color variants if this is a parent item or has variants
+        if not self.object.is_variant:
+            context['color_variants'] = self.object.get_variants()
+
+        # Get related items (excluding variants of this item)
         context['related_items'] = Item.objects.filter(
             category__in=self.object.category.all(),
-            is_active=True
-        ).exclude(id=self.object.id)[:6]
+            is_active=True,
+            is_variant=False  # Only show parent items as related
+        ).exclude(id=self.object.id).exclude(
+            variants__id=self.object.id  # Exclude items that this item is a variant of
+        )[:6]
 
         context['categories'] = Category.objects.all()
 
@@ -140,6 +155,16 @@ class ItemDetailView(DetailView):
 
         return context
 
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        # If this is a variant, redirect to the parent item
+        if self.object.is_variant and self.object.parent_item:
+            return redirect('item-detail', pk=self.object.parent_item.id)
+
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
+
 
 class MerchandiserShopView(LoginRequiredMixin, ListView):
     model = Item
@@ -149,11 +174,43 @@ class MerchandiserShopView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         # Only show items belonging to the logged-in user
+        # For merchandiser view, we want to show all items including variants
         return Item.objects.filter(merchandiser=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['categories'] = Category.objects.all()
+
+        # Organize items by parent/variant relationship
+        items = self.get_queryset()
+
+        # Get parent items (non-variants)
+        parent_items = items.filter(is_variant=False)
+
+        # Create a dictionary of parent items with their variants
+        organized_items = []
+        for parent in parent_items:
+            variants = parent.variants.all()
+            organized_items.append({
+                'parent': parent,
+                'variants': variants,
+                'has_variants': variants.exists()
+            })
+
+        # Add orphaned variants (variants without a parent or with a parent not owned by this user)
+        orphaned_variants = items.filter(
+            is_variant=True, 
+            parent_item__isnull=True
+        )
+        for variant in orphaned_variants:
+            organized_items.append({
+                'parent': variant,
+                'variants': [],
+                'has_variants': False,
+                'is_orphaned_variant': True
+            })
+
+        context['organized_items'] = organized_items
         return context
 
 
@@ -172,6 +229,21 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         # Assign the current logged-in user as the merchandiser
         form.instance.merchandiser = self.request.user
+
+        # Handle color variants
+        has_color_variants = form.cleaned_data.get('has_color_variants', False)
+        is_variant_of = form.cleaned_data.get('is_variant_of')
+        color = form.cleaned_data.get('color')
+
+        # If this is a variant of another item
+        if is_variant_of:
+            form.instance.parent_item = is_variant_of
+            form.instance.is_variant = True
+            # Inherit some properties from parent
+            form.instance.short_description = is_variant_of.short_description
+            form.instance.description = is_variant_of.description
+            form.instance.category = is_variant_of.category
+
         # Save the Item instance
         self.object = form.save()
 
@@ -181,14 +253,61 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
             Picture.objects.create(item=self.object, picture=image_file)
             # The Picture model's save() method will handle thumbnails/squares
 
+        # If parent item has images and this is a variant with no images, copy parent images
+        if is_variant_of and not images:
+            parent_pictures = Picture.objects.filter(item=is_variant_of)
+            for parent_pic in parent_pictures:
+                # Create a copy of the parent picture for this variant
+                new_pic = Picture(
+                    item=self.object,
+                    user=self.request.user,
+                    picture=parent_pic.picture,
+                    thumbnail=parent_pic.thumbnail,
+                    square_image=parent_pic.square_image
+                )
+                new_pic.save()
+
         # Use the success_url defined on the class
         return super().form_valid(form)
 
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Create New Item'
+
+        # Check if this is a variant creation
+        is_variant_of = self.request.GET.get('is_variant_of')
+        if is_variant_of:
+            try:
+                parent_item = Item.objects.get(id=is_variant_of, merchandiser=self.request.user)
+                context['form_title'] = f'Create Color Variant for {parent_item.name}'
+                context['parent_item'] = parent_item
+            except Item.DoesNotExist:
+                context['form_title'] = 'Create New Item'
+        else:
+            context['form_title'] = 'Create New Item'
+
         return context
+
+    def get_initial(self):
+        initial = super().get_initial()
+
+        # Check if this is a variant creation
+        is_variant_of = self.request.GET.get('is_variant_of')
+        if is_variant_of:
+            try:
+                parent_item = Item.objects.get(id=is_variant_of, merchandiser=self.request.user)
+                # Pre-fill form with parent item data
+                initial['is_variant_of'] = parent_item
+                initial['name'] = parent_item.name
+                initial['price'] = parent_item.price
+                initial['short_description'] = parent_item.short_description
+                initial['description'] = parent_item.description
+                initial['category'] = parent_item.category.all()
+                initial['locations'] = parent_item.locations.all()
+            except Item.DoesNotExist:
+                pass
+
+        return initial
 
 
 # View for updating an existing item
@@ -211,6 +330,25 @@ class ItemUpdateView(LoginRequiredMixin, UpdateView):
         return queryset.filter(merchandiser=self.request.user)
 
     def form_valid(self, form):
+        # Handle color variants
+        has_color_variants = form.cleaned_data.get('has_color_variants', False)
+        is_variant_of = form.cleaned_data.get('is_variant_of')
+        color = form.cleaned_data.get('color')
+
+        # If this is a variant of another item
+        if is_variant_of and not self.object.is_variant:
+            # This is becoming a variant
+            form.instance.parent_item = is_variant_of
+            form.instance.is_variant = True
+            # Inherit some properties from parent
+            form.instance.short_description = is_variant_of.short_description
+            form.instance.description = is_variant_of.description
+            form.instance.category = is_variant_of.category
+        elif not is_variant_of and self.object.is_variant:
+            # This is no longer a variant
+            form.instance.parent_item = None
+            form.instance.is_variant = False
+
         # Save the updated Item instance
         self.object = form.save()
 
@@ -219,6 +357,20 @@ class ItemUpdateView(LoginRequiredMixin, UpdateView):
         for image_file in images:
             Picture.objects.create(item=self.object, picture=image_file)
             # The Picture model's save() method will handle thumbnails/squares
+
+        # If parent item has images and this is a variant with no images, copy parent images
+        if is_variant_of and not self.object.pictures.exists():
+            parent_pictures = Picture.objects.filter(item=is_variant_of)
+            for parent_pic in parent_pictures:
+                # Create a copy of the parent picture for this variant
+                new_pic = Picture(
+                    item=self.object,
+                    user=self.request.user,
+                    picture=parent_pic.picture,
+                    thumbnail=parent_pic.thumbnail,
+                    square_image=parent_pic.square_image
+                )
+                new_pic.save()
 
         # Use the success_url defined on the class
         return super().form_valid(form)

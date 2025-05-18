@@ -214,10 +214,10 @@ class MerchandiserShopView(LoginRequiredMixin, ListView):
         return context
 
 
-# View for creating a new item
-class ItemCreateView(LoginRequiredMixin, CreateView):
+# Base class for item form views
+class ItemFormViewBase(LoginRequiredMixin):
     model = Item
-    form_class = forms.ItemForm  # Use the ItemForm
+    form_class = forms.ItemForm
     template_name = 'ufo_shop/item_form.html'
     success_url = reverse_lazy('merchandiser_shop')
 
@@ -226,37 +226,55 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
         kwargs['user'] = self.request.user
         return kwargs
 
-    def form_valid(self, form):
-        # Assign the current logged-in user as the merchandiser
-        form.instance.merchandiser = self.request.user
-
-        # Handle color variants
-        has_color_variants = form.cleaned_data.get('has_color_variants', False)
+    def _handle_variant_relationship(self, form, is_create=True):
+        """Handle the variant relationship between items"""
         is_variant_of = form.cleaned_data.get('is_variant_of')
-        color = form.cleaned_data.get('color')
 
-        # If this is a variant of another item
-        if is_variant_of:
-            form.instance.parent_item = is_variant_of
-            form.instance.is_variant = True
-            # Inherit some properties from parent
-            form.instance.short_description = is_variant_of.short_description
-            form.instance.description = is_variant_of.description
-            self.object = form.save()
-            self.object.category.set(is_variant_of.category.all())
+        if is_create:
+            # For create view
+            if is_variant_of:
+                form.instance.parent_item = is_variant_of
+                form.instance.is_variant = True
+                # Inherit some properties from parent
+                form.instance.short_description = is_variant_of.short_description
+                form.instance.description = is_variant_of.description
+                self.object = form.save()
+                self.object.category.set(is_variant_of.category.all())
+        else:
+            # For update view
+            if is_variant_of and not self.object.is_variant:
+                # This is becoming a variant
+                form.instance.parent_item = is_variant_of
+                form.instance.is_variant = True
+                # Inherit some properties from parent
+                form.instance.short_description = is_variant_of.short_description
+                form.instance.description = is_variant_of.description
+                form.instance.category = is_variant_of.category
+            elif not is_variant_of and self.object.is_variant:
+                # This is no longer a variant
+                form.instance.parent_item = None
+                form.instance.is_variant = False
 
-
-        # Save the Item instance
-        self.object = form.save()
+    def _handle_image_uploads(self, is_variant_of=None, is_create=True):
+        """Handle image uploads and copying from parent item"""
+        # Debug logging
+        print("DEBUG: request.FILES:", self.request.FILES)
+        print("DEBUG: request.POST:", self.request.POST)
 
         # Handle multiple image uploads
-        images = self.request.FILES.getlist('images') # 'images' is the name of the form field
+        images = self.request.FILES.getlist('images')  # 'images' is the name of the form field
+        print("DEBUG: images:", images)
         for image_file in images:
-            Picture.objects.create(item=self.object, picture=image_file)
+            Picture.objects.create(
+                item=self.object, 
+                user=self.request.user, 
+                picture=image_file
+            )
             # The Picture model's save() method will handle thumbnails/squares
 
         # If parent item has images and this is a variant with no images, copy parent images
-        if is_variant_of and not images:
+        has_images = images if is_create else self.object.pictures.exists()
+        if is_variant_of and not has_images:
             parent_pictures = Picture.objects.filter(item=is_variant_of)
             for parent_pic in parent_pictures:
                 # Create a copy of the parent picture for this variant
@@ -272,9 +290,27 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
                     new_pic.picture = parent_pic.picture
                 new_pic.save()
 
+
+# View for creating a new item
+class ItemCreateView(ItemFormViewBase, CreateView):
+    def form_valid(self, form):
+        # Assign the current logged-in user as the merchandiser
+        form.instance.merchandiser = self.request.user
+
+        # Handle color variants
+        is_variant_of = form.cleaned_data.get('is_variant_of')
+
+        # Handle variant relationship
+        self._handle_variant_relationship(form, is_create=True)
+
+        # Save the Item instance
+        self.object = form.save()
+
+        # Handle image uploads
+        self._handle_image_uploads(is_variant_of, is_create=True)
+
         # Use the success_url defined on the class
         return super().form_valid(form)
-
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -316,17 +352,7 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
 
 
 # View for updating an existing item
-class ItemUpdateView(LoginRequiredMixin, UpdateView):
-    model = Item
-    form_class = forms.ItemForm  # Use the ItemForm instead of fields
-    template_name = 'ufo_shop/item_form.html'
-    success_url = reverse_lazy('merchandiser_shop')
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-
+class ItemUpdateView(ItemFormViewBase, UpdateView):
     def get_queryset(self):
         # Ensure users can only edit their own items
         queryset = super().get_queryset()
@@ -335,50 +361,27 @@ class ItemUpdateView(LoginRequiredMixin, UpdateView):
         return queryset.filter(merchandiser=self.request.user)
 
     def form_valid(self, form):
-        # Handle color variants
-        has_color_variants = form.cleaned_data.get('has_color_variants', False)
-        is_variant_of = form.cleaned_data.get('is_variant_of')
-        color = form.cleaned_data.get('color')
+        # Check if the delete_selected button was clicked
+        if 'delete_selected' in self.request.POST:
+            # Get the list of image IDs to delete
+            image_ids = self.request.POST.getlist('delete_images')
+            if image_ids:
+                # Delete the selected images
+                pictures_to_delete = Picture.objects.filter(id__in=image_ids, item=self.object)
+                for picture in pictures_to_delete:
+                    picture.delete()  # This will also delete the image files
+                messages.success(self.request, f"{len(pictures_to_delete)} image(s) deleted successfully.")
+            return HttpResponseRedirect(self.request.path)  # Redirect to the same page
 
-        # If this is a variant of another item
-        if is_variant_of and not self.object.is_variant:
-            # This is becoming a variant
-            form.instance.parent_item = is_variant_of
-            form.instance.is_variant = True
-            # Inherit some properties from parent
-            form.instance.short_description = is_variant_of.short_description
-            form.instance.description = is_variant_of.description
-            form.instance.category = is_variant_of.category
-        elif not is_variant_of and self.object.is_variant:
-            # This is no longer a variant
-            form.instance.parent_item = None
-            form.instance.is_variant = False
+        # Handle variant relationship
+        is_variant_of = form.cleaned_data.get('is_variant_of')
+        self._handle_variant_relationship(form, is_create=False)
 
         # Save the updated Item instance
         self.object = form.save()
 
-        # Handle *new* multiple image uploads
-        images = self.request.FILES.getlist('images') # 'images' is the name of the form field
-        for image_file in images:
-            Picture.objects.create(item=self.object, picture=image_file)
-            # The Picture model's save() method will handle thumbnails/squares
-
-        # If parent item has images and this is a variant with no images, copy parent images
-        if is_variant_of and not self.object.pictures.exists():
-            parent_pictures = Picture.objects.filter(item=is_variant_of)
-            for parent_pic in parent_pictures:
-                # Create a copy of the parent picture for this variant
-                # Only copy the thumbnail and square_image, as the original picture may have been deleted
-                new_pic = Picture(
-                    item=self.object,
-                    user=self.request.user,
-                    thumbnail=parent_pic.thumbnail,
-                    square_image=parent_pic.square_image
-                )
-                # Only set the picture field if it exists in the parent
-                if parent_pic.picture:
-                    new_pic.picture = parent_pic.picture
-                new_pic.save()
+        # Handle image uploads
+        self._handle_image_uploads(is_variant_of, is_create=False)
 
         # Use the success_url defined on the class
         return super().form_valid(form)

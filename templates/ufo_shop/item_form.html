@@ -37,6 +37,37 @@
         <form method="post" enctype="multipart/form-data">
           {% csrf_token %}
           {% crispy form %}
+
+          {% if existing_pictures %}
+            <div class="card mt-4 mb-4">
+              <div class="card-header bg-light">
+                <h5 class="mb-0">{% trans "Existing Images" %}</h5>
+                <small class="text-muted">{% trans "Select images to delete" %}</small>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  {% for picture in existing_pictures %}
+                    <div class="col-md-3 mb-3">
+                      <div class="card">
+                        <img src="{{ picture.thumbnail.url }}" class="card-img-top" alt="{{ picture }}">
+                        <div class="card-body text-center">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="delete_images" value="{{ picture.id }}" id="delete_image_{{ picture.id }}">
+                            <label class="form-check-label" for="delete_image_{{ picture.id }}">
+                              {% trans "Delete" %}
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+                <div class="text-center mt-3">
+                  <button type="submit" name="delete_selected" class="btn btn-danger">{% trans "Delete Selected Images" %}</button>
+                </div>
+              </div>
+            </div>
+          {% endif %}
         </form>
       </div>
     </div>

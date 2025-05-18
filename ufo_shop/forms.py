@@ -71,12 +71,23 @@ class SignUpForm(UserCreationForm):
         )
 
 
+class MultipleFileInput(forms.FileInput):
+    allow_multiple_selected = True
+
+    def get_context(self, name, value, attrs):
+        if attrs is None:
+            attrs = {}
+        attrs['multiple'] = 'multiple'
+        attrs['accept'] = 'image/*'
+        attrs['class'] = 'form-control'
+        context = super().get_context(name, value, attrs)
+        return context
+
+
 class ItemForm(forms.ModelForm):
     images = forms.ImageField(
         label="Upload Images",
-        widget=forms.ClearableFileInput(
-            # attrs={'multiple': True}
-        ),
+        widget=MultipleFileInput(),
         required=False  # Make it optional if items can be created without images initially
     )
 
@@ -104,6 +115,8 @@ class ItemForm(forms.ModelForm):
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-sm-3'
         self.helper.field_class = 'col-sm-9'
+        self.helper.attrs = {'enctype': 'multipart/form-data'}
+        self.helper.form_tag = False
 
         # Filter locations to show only those created by the user and universal ones
         if self.user:

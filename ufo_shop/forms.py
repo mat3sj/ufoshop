@@ -71,23 +71,10 @@ class SignUpForm(UserCreationForm):
         )
 
 
-class MultipleFileInput(forms.FileInput):
-    allow_multiple_selected = True
-
-    def get_context(self, name, value, attrs):
-        if attrs is None:
-            attrs = {}
-        attrs['multiple'] = 'multiple'
-        attrs['accept'] = 'image/*'
-        attrs['class'] = 'form-control'
-        context = super().get_context(name, value, attrs)
-        return context
-
-
 class ItemForm(forms.ModelForm):
     images = forms.ImageField(
         label="Upload Images",
-        widget=MultipleFileInput(),
+        widget=forms.FileInput(),
         required=False  # Make it optional if items can be created without images initially
     )
 

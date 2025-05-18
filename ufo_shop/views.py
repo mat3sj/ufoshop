@@ -261,10 +261,10 @@ class ItemFormViewBase(LoginRequiredMixin):
         print("DEBUG: request.FILES:", self.request.FILES)
         print("DEBUG: request.POST:", self.request.POST)
 
-        # Handle multiple image uploads
-        images = self.request.FILES.getlist('images')  # 'images' is the name of the form field
-        print("DEBUG: images:", images)
-        for image_file in images:
+        # Handle single image upload
+        image_file = self.request.FILES.get('images')  # 'images' is the name of the form field
+        print("DEBUG: image:", image_file)
+        if image_file:
             Picture.objects.create(
                 item=self.object, 
                 user=self.request.user, 
@@ -273,7 +273,7 @@ class ItemFormViewBase(LoginRequiredMixin):
             # The Picture model's save() method will handle thumbnails/squares
 
         # If parent item has images and this is a variant with no images, copy parent images
-        has_images = images if is_create else self.object.pictures.exists()
+        has_images = image_file if is_create else self.object.pictures.exists()
         if is_variant_of and not has_images:
             parent_pictures = Picture.objects.filter(item=is_variant_of)
             for parent_pic in parent_pictures:

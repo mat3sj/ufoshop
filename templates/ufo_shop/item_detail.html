@@ -6,24 +6,103 @@
   {{ item.name }} | {% trans "Product Details" %}
 {% endblock %}
 
+{% block extra_css %}
+<style>
+  /* Image gallery styles */
+  .main-image-container {
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .main-image-container:hover {
+    transform: scale(1.02);
+  }
+
+  .thumbnail-wrapper {
+    transition: all 0.2s;
+    border: 2px solid transparent;
+    overflow: hidden;
+  }
+
+  .thumbnail-wrapper:hover {
+    border-color: #6c757d;
+  }
+
+  .active-thumbnail {
+    border-color: #28a745 !important;
+  }
+
+  .gallery-thumb {
+    transition: transform 0.2s;
+  }
+
+  .gallery-thumb:hover {
+    transform: scale(1.1);
+  }
+
+  /* Modal styles */
+  .modal-body {
+    padding: 0;
+  }
+
+  .carousel-item {
+    text-align: center;
+    background-color: #f8f9fa;
+  }
+
+  .carousel-item img {
+    max-height: 70vh;
+    margin: 0 auto;
+    object-fit: contain;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
   <div class="container mt-5">
     <div class="row">
       <div class="col-md-6">
-        {% if item.pictures.first %}
-          {% if item.pictures.first.square_image %}
-            <img src="{{ item.pictures.first.square_image.url }}" class="img-fluid rounded" alt="{{ item.name }}">
-          {% elif item.pictures.first.thumbnail %}
-            <img src="{{ item.pictures.first.thumbnail.url }}" class="img-fluid rounded" alt="{{ item.name }}">
+        <!-- Main image display -->
+        <div class="main-image-container mb-3 position-relative">
+          {% if item.pictures.first %}
+            {% if item.pictures.first.square_image %}
+              <img src="{{ item.pictures.first.square_image.url }}" class="img-fluid rounded main-image" alt="{{ item.name }}" data-bs-toggle="modal" data-bs-target="#imageGalleryModal" data-index="0" style="cursor: pointer;">
+            {% elif item.pictures.first.thumbnail %}
+              <img src="{{ item.pictures.first.thumbnail.url }}" class="img-fluid rounded main-image" alt="{{ item.name }}" data-bs-toggle="modal" data-bs-target="#imageGalleryModal" data-index="0" style="cursor: pointer;">
+            {% else %}
+              <div class="bg-light p-5 text-center">
+                <p>{% trans "No image available" %}</p>
+              </div>
+            {% endif %}
+            {% if item.pictures.count > 1 %}
+              <div class="position-absolute bottom-0 end-0 p-2 bg-dark bg-opacity-50 rounded-start text-white">
+                <small>{% trans "Click to view gallery" %}</small>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-images ms-1" viewBox="0 0 16 16">
+                  <path d="M4.502 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
+                  <path d="M14.002 13a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2V5A2 2 0 0 1 2 3a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-1.998 2zM14 2H4a1 1 0 0 0-1 1h9.002a2 2 0 0 1 2 2v7A1 1 0 0 0 15 11V3a1 1 0 0 0-1-1zM2.002 4a1 1 0 0 0-1 1v8l2.646-2.354a.5.5 0 0 1 .63-.062l2.66 1.773 3.71-3.71a.5.5 0 0 1 .577-.094l1.777 1.947V5a1 1 0 0 0-1-1h-10z"/>
+                </svg>
+              </div>
+            {% endif %}
           {% else %}
             <div class="bg-light p-5 text-center">
               <p>{% trans "No image available" %}</p>
             </div>
           {% endif %}
-        {% else %}
-          <div class="bg-light p-5 text-center">
-            <p>{% trans "No image available" %}</p>
-          </div>
+        </div>
+
+        <!-- Thumbnail gallery -->
+        {% if item.pictures.count > 1 %}
+        <div class="thumbnail-gallery d-flex flex-wrap gap-2 mb-3">
+          {% for picture in item.pictures.all %}
+            {% if picture.thumbnail %}
+              <div class="thumbnail-wrapper {% if forloop.first %}active-thumbnail{% endif %}" style="width: 80px; height: 80px; border: 2px solid transparent;">
+                <img src="{{ picture.thumbnail.url }}" class="img-thumbnail gallery-thumb w-100 h-100" alt="{{ item.name }}" 
+                     data-bs-toggle="modal" data-bs-target="#imageGalleryModal" data-index="{{ forloop.counter0 }}"
+                     style="object-fit: cover; cursor: pointer;">
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
         {% endif %}
       </div>
       <div class="col-md-6">
@@ -104,6 +183,52 @@
       </div>
     {% endif %}
   </div>
+
+  <!-- Image Gallery Modal -->
+  {% if item.pictures.exists %}
+  <div class="modal fade" id="imageGalleryModal" tabindex="-1" aria-labelledby="imageGalleryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="imageGalleryModalLabel">{{ item.name }} - {% trans "Image Gallery" %}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div id="galleryCarousel" class="carousel slide" data-bs-ride="false">
+            <div class="carousel-inner">
+              {% for picture in item.pictures.all %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}" id="carousel-item-{{ forloop.counter0 }}">
+                  <div class="d-flex justify-content-center align-items-center bg-light" style="min-height: 400px;">
+                    {% if picture.picture %}
+                      <img src="{{ picture.picture.url }}" class="d-block img-fluid" alt="{{ item.name }} - {% trans 'Image' %} {{ forloop.counter }}">
+                    {% elif picture.square_image %}
+                      <img src="{{ picture.square_image.url }}" class="d-block img-fluid" alt="{{ item.name }} - {% trans 'Image' %} {{ forloop.counter }}">
+                    {% elif picture.thumbnail %}
+                      <img src="{{ picture.thumbnail.url }}" class="d-block img-fluid" alt="{{ item.name }} - {% trans 'Image' %} {{ forloop.counter }}">
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            {% if item.pictures.count > 1 %}
+              <button class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">{% trans "Previous" %}</span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#galleryCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">{% trans "Next" %}</span>
+              </button>
+            {% endif %}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Close" %}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
 {% endblock %}
 
 {% block extra_js %}
@@ -132,6 +257,80 @@
         itemAmountDisplay.textContent = amount;
       });
     });
+
+    // Image Gallery functionality
+    {% if item.pictures.exists %}
+    // Get all thumbnail images and the main image
+    const thumbnails = document.querySelectorAll('.gallery-thumb');
+    const mainImage = document.querySelector('.main-image');
+    const galleryModal = document.getElementById('imageGalleryModal');
+    const carousel = document.getElementById('galleryCarousel');
+
+    // Initialize the Bootstrap carousel
+    const bsCarousel = new bootstrap.Carousel(carousel, {
+      interval: false // Don't auto-rotate
+    });
+
+    // Function to update the main image when a thumbnail is clicked
+    function updateMainImage(thumbnail) {
+      if (mainImage) {
+        mainImage.src = thumbnail.src;
+        mainImage.setAttribute('data-index', thumbnail.getAttribute('data-index'));
+      }
+
+      // Update active thumbnail styling
+      const thumbnailWrappers = document.querySelectorAll('.thumbnail-wrapper');
+      thumbnailWrappers.forEach(wrapper => {
+        wrapper.classList.remove('active-thumbnail');
+        wrapper.style.borderColor = 'transparent';
+      });
+
+      // Add active class to the clicked thumbnail's wrapper
+      const clickedWrapper = thumbnail.closest('.thumbnail-wrapper');
+      if (clickedWrapper) {
+        clickedWrapper.classList.add('active-thumbnail');
+        clickedWrapper.style.borderColor = '#28a745'; // Use the site's green color
+      }
+    }
+
+    // Add click event listeners to thumbnails
+    thumbnails.forEach(thumbnail => {
+      thumbnail.addEventListener('click', function() {
+        // Update main image when thumbnail is clicked
+        updateMainImage(this);
+
+        // Set the active carousel item based on the clicked thumbnail's index
+        const index = parseInt(this.getAttribute('data-index'));
+        bsCarousel.to(index);
+      });
+    });
+
+    // When the main image is clicked, open the modal with the correct image
+    if (mainImage) {
+      mainImage.addEventListener('click', function() {
+        const index = parseInt(this.getAttribute('data-index'));
+        bsCarousel.to(index);
+      });
+    }
+
+    // When the modal is about to be shown, set the correct carousel slide
+    galleryModal.addEventListener('show.bs.modal', function(event) {
+      // Get the element that triggered the modal
+      const triggerElement = event.relatedTarget;
+      if (triggerElement) {
+        // Get the index from the clicked element
+        const index = parseInt(triggerElement.getAttribute('data-index'));
+        // Set the active carousel item
+        bsCarousel.to(index);
+      }
+    });
+
+    // When the modal is shown, ensure the carousel is properly initialized
+    galleryModal.addEventListener('shown.bs.modal', function() {
+      // Force carousel to recalculate dimensions
+      window.dispatchEvent(new Event('resize'));
+    });
+    {% endif %}
   });
 </script>
 {% endblock %}

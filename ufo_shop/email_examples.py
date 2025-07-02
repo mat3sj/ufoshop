@@ -12,7 +12,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
 
-from ufo_shop.utils import send_template_email
+from ufo_shop.utils.emailing import send_template_email
 
 User = get_user_model()
 

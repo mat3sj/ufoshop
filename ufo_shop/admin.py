@@ -306,3 +306,53 @@ class NewsAdmin(admin.ModelAdmin):
 
     readonly_fields = ('image_preview',)
     fields = ('title', 'content', 'image', 'image_preview', 'is_active')
+
+
+@admin.register(Issuer)
+class IssuerAdmin(admin.ModelAdmin):
+    list_display = ('name', 'city', 'country', 'registration_id', 'tax_id', 'is_default')
+    list_filter = ('is_default', 'country')
+    search_fields = ('name', 'address', 'registration_id', 'tax_id')
+    ordering = ('name',)
+
+    def logo_preview(self, obj):
+        if obj.logo:
+            return mark_safe(f'<img src="{obj.logo.url}" width="100" />')
+        return "No logo"
+
+    logo_preview.short_description = 'Logo Preview'
+
+    readonly_fields = ('logo_preview',)
+    fields = (
+        'name', 'address', 'city', 'postal_code', 'country',
+        'registration_id', 'tax_id', 'bank_account', 'iban', 'swift',
+        'logo', 'logo_preview', 'is_default'
+    )
+
+
+@admin.register(Invoice)
+class InvoiceAdmin(admin.ModelAdmin):
+    list_display = ('invoice_number', 'order', 'issuer', 'created_at', 'due_date', 'is_paid', 'total_amount')
+    list_filter = ('is_paid', 'issuer', 'created_at')
+    search_fields = ('invoice_number', 'order__id', 'order__user__email')
+    ordering = ('-created_at',)
+
+    readonly_fields = ('pdf_preview', 'created_at', 'updated_at')
+
+    def pdf_preview(self, obj):
+        if obj.pdf_file:
+            return mark_safe(f'<a href="{obj.pdf_file.url}" target="_blank">View PDF</a>')
+        return "No PDF generated"
+
+    pdf_preview.short_description = 'PDF Preview'
+
+    fields = (
+        'invoice_number', 'order', 'issuer', 'created_at', 'updated_at',
+        'is_paid', 'due_date', 'total_amount', 'currency', 'pdf_file', 'pdf_preview'
+    )
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        # Generate PDF if it doesn't exist
+        if not obj.pdf_file:
+            obj.generate_pdf()

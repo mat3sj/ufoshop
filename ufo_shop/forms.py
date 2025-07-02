@@ -157,7 +157,7 @@ class ItemForm(forms.ModelForm):
                 'Item Details',
                 Row(
                     Column('name', css_class='form-group col-md-6'),
-                    Column('price', css_class='form-group col-md-6'),
+                    Column('base_price', css_class='form-group col-md-6'),
                 ),
                 Row(
                     Column('amount', css_class='form-group col-md-6'),
@@ -191,7 +191,7 @@ class ItemForm(forms.ModelForm):
         model = Item
         # List all fields EXCEPT any old image field that was directly on Item
         fields = [
-            'name', 'price', 'amount', 'locations',
+            'name', 'base_price', 'amount', 'locations',
             'short_description', 'description', 'category', 'is_active',
             'color'  # Add color field
             # DO NOT include 'pictures' or any single ImageField previously on Item here
@@ -259,11 +259,6 @@ class CheckoutForm(forms.ModelForm):
         initial='qr_code'  # Default to QR code since it's the only option
     )
 
-    needs_receipt = forms.BooleanField(
-        label="I need a receipt (+7% fee)",
-        required=False,
-        help_text="Check this box if you need a receipt. A 7% fee will be added to your order."
-    )
 
     def __init__(self, *args, **kwargs):
         self.cart_items = kwargs.pop('cart_items', None)
@@ -320,7 +315,6 @@ class CheckoutForm(forms.ModelForm):
             Fieldset(
                 'Payment Method',
                 'payment_method',
-                'needs_receipt',
             ),
             Div(
                 Submit('submit', 'Complete Order', css_class='btn btn-success btn-lg'),
@@ -339,5 +333,5 @@ class CheckoutForm(forms.ModelForm):
     class Meta:
         model = Order
         fields = [
-            'contact_email', 'contact_phone', 'payment_method', 'needs_receipt'
+            'contact_email', 'contact_phone', 'payment_method'
         ]

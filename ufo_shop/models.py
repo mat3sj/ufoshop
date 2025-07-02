@@ -8,11 +8,11 @@ import base64
 import math
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.moduledrawers import HorizontalBarsDrawer
-from qrcode.image.styles.moduledrawers.pil import RoundedModuleDrawer
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.html import mark_safe
+from django.conf import settings
 
 THUMBNAIL_SIZE = 150
 SQUARE_IMAGE_SIZE = 1024
@@ -64,7 +64,9 @@ class Category(models.Model):
 class Item(models.Model):
     name = models.CharField("Item Name", max_length=255)
     merchandiser = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Merchandiser")
-    price = models.IntegerField("Price", default=0)
+    base_price = models.IntegerField("Base Price (without service fee)", default=0, 
+                                    help_text=f"This is the price that goes to your pocket. A {int(settings.SERVICE_FEE * 100)}% service fee will be added automatically.")
+    price = models.IntegerField("Final Price (with service fee)", default=0, editable=False)
     amount = models.IntegerField("Amount", null=True, blank=True)
     locations = models.ManyToManyField(Location, blank=True, verbose_name="Pickup Locations")
     short_description = models.CharField("Short Description", max_length=255, default='')
@@ -101,6 +103,15 @@ class Item(models.Model):
         """Check if this item has color variants"""
         return self.variants.exists()
 
+    def calculate_price_with_service_fee(self):
+        """Calculate the final price with service fee"""
+        return int(self.base_price * (1 + settings.SERVICE_FEE))
+
+    def save(self, *args, **kwargs):
+        """Override save to automatically calculate price with service fee"""
+        self.price = self.calculate_price_with_service_fee()
+        super().save(*args, **kwargs)
+
 
 class Order(models.Model):
     class Status(models.IntegerChoices):
@@ -128,8 +139,6 @@ class Order(models.Model):
     # Payment information
     payment_method = models.CharField("Payment Method", max_length=50, blank=True, null=True)
     payment_id = models.CharField("Payment ID", max_length=100, blank=True, null=True)
-    needs_receipt = models.BooleanField("Needs Receipt", default=False, help_text="If checked, a 7% fee will be added for receipt processing")
-    receipt_fee = models.DecimalField("Receipt Fee", max_digits=10, decimal_places=2, default=0)
 
     # Order details
     subtotal = models.DecimalField("Subtotal", max_digits=10, decimal_places=2, default=0)
@@ -157,12 +166,8 @@ class Order(models.Model):
         # For now, shipping is free
         self.shipping_cost = 0
 
-        # Calculate receipt fee if needed (7% of subtotal)
-        self.receipt_fee = 0
-        if self.needs_receipt:
-            self.receipt_fee = self.subtotal * 0.07
-
-        self.total = self.subtotal + self.shipping_cost + self.receipt_fee
+        # Total is just subtotal plus shipping (service fee is already included in item price)
+        self.total = self.subtotal + self.shipping_cost
         return self.total
 
     def _convert_to_iban(self, account_number):
@@ -483,6 +488,117 @@ class Picture(models.Model):
         #     # Delete the file from storage if it exists
         #     if os.path.exists(original_path):
         #         os.remove(original_path)
+
+
+class Issuer(models.Model):
+    """Model to store invoice issuers"""
+    name = models.CharField("Name", max_length=200)
+    address = models.TextField("Address")
+    city = models.CharField("City", max_length=100)
+    postal_code = models.CharField("Postal Code", max_length=20)
+    country = models.CharField("Country", max_length=100, default="Czech Republic")
+    registration_id = models.CharField("Registration ID (IČO)", max_length=50, blank=True, null=True)
+    tax_id = models.CharField("Tax ID (DIČ)", max_length=50, blank=True, null=True)
+    bank_account = models.CharField("Bank Account", max_length=100, blank=True, null=True)
+    iban = models.CharField("IBAN", max_length=50, blank=True, null=True)
+    swift = models.CharField("SWIFT", max_length=20, blank=True, null=True)
+    logo = models.ImageField("Logo", upload_to='issuer_logos/', blank=True, null=True)
+    is_default = models.BooleanField("Default Issuer", default=False)
+
+    class Meta:
+        verbose_name = "Invoice Issuer"
+        verbose_name_plural = "Invoice Issuers"
+
+    def save(self, *args, **kwargs):
+        # If this issuer is set as default, unset default for all other issuers
+        if self.is_default:
+            Issuer.objects.filter(is_default=True).update(is_default=False)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+
+class Invoice(models.Model):
+    """Model to store invoice information"""
+    invoice_number = models.CharField("Invoice Number", max_length=100)
+    order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='invoices')
+    issuer = models.ForeignKey('Issuer', on_delete=models.PROTECT, related_name='invoices')
+    created_at = models.DateTimeField("Created At", auto_now_add=True)
+    updated_at = models.DateTimeField("Updated At", auto_now=True)
+    is_paid = models.BooleanField("Is Paid", default=False)
+    due_date = models.DateField("Due Date", null=True, blank=True)
+    total_amount = models.DecimalField("Total Amount", max_digits=10, decimal_places=2, default=0)
+    currency = models.CharField("Currency", max_length=3, default="CZK")
+    pdf_file = models.FileField("PDF File", upload_to='invoices/', blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Invoice"
+        verbose_name_plural = "Invoices"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Invoice {self.invoice_number} for Order {self.order.id}"
+
+    @classmethod
+    def create_from_order(cls, order, issuer=None):
+        """Create an invoice from an order"""
+        if not issuer:
+            # Get default issuer
+            issuer = Issuer.objects.filter(is_default=True).first()
+            if not issuer:
+                # If no default issuer, get the first one
+                issuer = Issuer.objects.first()
+                if not issuer:
+                    raise ValueError("No issuers found in the system")
+
+        # Generate invoice number (e.g., INV-YYYY-ORDERID)
+        from django.utils import timezone
+        invoice_number = f"INV-{timezone.now().year}-{order.id}"
+
+        # Create invoice
+        invoice = cls.objects.create(
+            invoice_number=invoice_number,
+            order=order,
+            issuer=issuer,
+            due_date=timezone.now().date() + timezone.timedelta(days=14),  # 14 days due date
+            total_amount=order.total,
+            currency="CZK"  # Default currency
+        )
+
+        # Generate PDF
+        invoice.generate_pdf()
+
+        return invoice
+
+    def generate_pdf(self):
+        """Generate PDF version of the invoice"""
+        import tempfile
+        from django.template.loader import render_to_string
+        from weasyprint import HTML
+        from django.core.files.base import ContentFile
+
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(suffix='.html') as temp_file:
+            # Render invoice template to HTML
+            context = {
+                'invoice': self,
+                'order': self.order,
+                'issuer': self.issuer,
+                'items': self.order.orderitem_set.all(),
+                'qr_code': self.order.get_payment_qr_code()
+            }
+            html_string = render_to_string('ufo_shop/invoice_pdf.html', context)
+
+            # Write HTML to temporary file
+            temp_file.write(html_string.encode('utf-8'))
+            temp_file.flush()
+
+            # Convert HTML to PDF
+            pdf = HTML(filename=temp_file.name).write_pdf()
+
+            # Save PDF to model
+            self.pdf_file.save(f"invoice_{self.invoice_number}.pdf", ContentFile(pdf), save=True)
 
 
 class News(models.Model):

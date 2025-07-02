@@ -78,12 +78,6 @@
                                     <td colspan="4" class="text-end"><strong>{% trans "Shipping" %}:</strong></td>
                                     <td class="text-end">{{ order.shipping_cost|floatformat:2 }} {% trans "CZK" %}</td>
                                 </tr>
-                                {% if order.needs_receipt %}
-                                <tr>
-                                    <td colspan="4" class="text-end"><strong>{% trans "Receipt Fee (7%)" %}:</strong></td>
-                                    <td class="text-end">{{ order.receipt_fee|floatformat:2 }} {% trans "CZK" %}</td>
-                                </tr>
-                                {% endif %}
                                 <tr>
                                     <td colspan="4" class="text-end"><strong>{% trans "Total" %}:</strong></td>
                                     <td class="text-end"><strong>{{ order.total|floatformat:2 }} {% trans "CZK" %}</strong></td>
@@ -121,9 +115,6 @@
                                         <li>{% trans "Confirm the payment" %}</li>
                                     </ol>
                                     <p>{% trans "Your order will be processed once the payment is received." %}</p>
-                                    {% if order.needs_receipt %}
-                                    <p><strong>{% trans "Note" %}:</strong> {% trans "A receipt will be provided as requested." %}</p>
-                                    {% endif %}
                                 </div>
                             </div>
                         </div>

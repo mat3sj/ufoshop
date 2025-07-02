@@ -1,5 +1,6 @@
 from django.template.loader import render_to_string
 from django.views import View
+from django.conf import settings
 # Import UpdateView
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, FormView, TemplateView
 from django.contrib.auth import get_user_model
@@ -16,7 +17,7 @@ from ufo_shop import forms
 from ufo_shop.models import Item, Category, Picture, Order, OrderItem, BANK_ACCOUNT
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy, reverse
-from ufo_shop.utils import ufoshop_send_email
+from ufo_shop.utils.emailing import ufoshop_send_email
 
 
 class CustomLoginView(LoginView):

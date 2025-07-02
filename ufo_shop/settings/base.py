@@ -175,3 +175,9 @@ DEFAULT_FROM_EMAIL = ''  # Your sender email (e.g., 'UFO Shop <noreply@ufoshop.c
 #############################
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+#############################
+# Business Rules
+#############################
+# Service fee percentage (as a decimal)
+SERVICE_FEE = 0.10  # 10%

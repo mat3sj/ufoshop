@@ -47,6 +47,7 @@ urlpatterns = [
     path('cart/update/', views.UpdateCartView.as_view(), name='update_cart'),
     path('checkout/', views.CheckoutView.as_view(), name='checkout'),
     path('order/<int:pk>/confirmation/', views.OrderConfirmationView.as_view(), name='order_confirmation'),
+    path('order/<int:order_id>/invoice/download/', views.DownloadInvoiceView.as_view(), name='download_invoice'),
     path('orders/', views.OrderHistoryView.as_view(), name='orders'),
 
     # Statistics

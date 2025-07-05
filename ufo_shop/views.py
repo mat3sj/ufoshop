@@ -14,7 +14,7 @@ from ufo_shop.models import News
 from django.db.models.functions import TruncMonth, TruncDay
 
 from ufo_shop import forms
-from ufo_shop.models import Item, Category, Picture, Order, OrderItem, BANK_ACCOUNT
+from ufo_shop.models import Item, Category, Picture, Order, OrderItem, Invoice, BANK_ACCOUNT
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy, reverse
 from ufo_shop.utils.emailing import ufoshop_send_email
@@ -565,6 +565,9 @@ class CheckoutView(LoginRequiredMixin, FormView):
                 item.pickup_location = pickup_location
                 item.save()
 
+        # Create invoice for the order
+        invoice = Invoice.create_from_order(cart)
+
         # Send order confirmation email
         self.send_order_confirmation(cart)
 
@@ -611,6 +614,14 @@ class OrderConfirmationView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['items'] = self.object.orderitem_set.all().select_related('item')
         context['BANK_ACCOUNT'] = BANK_ACCOUNT
+
+        # Get the latest invoice for the order
+        invoice = self.object.invoices.order_by('-created_at').first()
+        if not invoice:
+            # If no invoice exists, create one
+            invoice = Invoice.create_from_order(self.object)
+        context['invoice'] = invoice
+
         return context
 
 
@@ -622,11 +633,20 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         # Only show orders that are not in cart
-        return Order.objects.filter(
+        orders = Order.objects.filter(
             user=self.request.user
         ).exclude(
             status=Order.Status.IN_CART
         ).order_by('-created_at')
+
+        # Ensure all orders have invoices
+        for order in orders:
+            # Check if order has an invoice
+            if not order.invoices.exists():
+                # Create invoice for the order
+                Invoice.create_from_order(order)
+
+        return orders
 
 
 class MerchandiserStatsView(LoginRequiredMixin, TemplateView):
@@ -687,6 +707,27 @@ class MerchandiserStatsView(LoginRequiredMixin, TemplateView):
         })
 
         return context
+
+
+class DownloadInvoiceView(LoginRequiredMixin, View):
+    """View to download invoice PDF for an order"""
+
+    def get(self, request, order_id):
+        # Get the order and ensure it belongs to the current user
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+
+        # Get the latest invoice for the order
+        invoice = order.invoices.order_by('-created_at').first()
+
+        if not invoice or not invoice.pdf_file:
+            # If no invoice exists or PDF not generated, create one
+            invoice = Invoice.create_from_order(order)
+
+        # Prepare the response with the PDF file
+        from django.http import FileResponse
+        response = FileResponse(invoice.pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="invoice_{invoice.invoice_number}.pdf"'
+        return response
 
 
 class AdminStatsView(UserPassesTestMixin, TemplateView):

@@ -574,9 +574,11 @@ class Invoice(models.Model):
     def generate_pdf(self):
         """Generate PDF version of the invoice"""
         import tempfile
+        import os
         from django.template.loader import render_to_string
         from weasyprint import HTML
         from django.core.files.base import ContentFile
+        from django.conf import settings
 
         # Create a temporary file
         with tempfile.NamedTemporaryFile(suffix='.html') as temp_file:
@@ -586,7 +588,9 @@ class Invoice(models.Model):
                 'order': self.order,
                 'issuer': self.issuer,
                 'items': self.order.orderitem_set.all(),
-                'qr_code': self.order.get_payment_qr_code()
+                'qr_code': self.order.get_payment_qr_code(),
+                'STATIC_ROOT': settings.STATIC_ROOT,
+                'MEDIA_ROOT': settings.MEDIA_ROOT
             }
             html_string = render_to_string('ufo_shop/invoice_pdf.html', context)
 
@@ -595,7 +599,11 @@ class Invoice(models.Model):
             temp_file.flush()
 
             # Convert HTML to PDF
-            pdf = HTML(filename=temp_file.name).write_pdf()
+            # Fix for pydyf.PDF.__init__() compatibility issue
+            # Use base_url to help WeasyPrint find static files
+            base_url = os.path.dirname(os.path.abspath(__file__))
+            html_doc = HTML(filename=temp_file.name, base_url=base_url)
+            pdf = html_doc.write_pdf(zoom=1)
 
             # Save PDF to model
             self.pdf_file.save(f"invoice_{self.invoice_number}.pdf", ContentFile(pdf), save=True)

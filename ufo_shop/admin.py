@@ -332,10 +332,11 @@ class IssuerAdmin(admin.ModelAdmin):
 
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ('invoice_number', 'order', 'issuer', 'created_at', 'due_date', 'is_paid', 'total_amount')
+    list_display = ('id', 'invoice_number', 'order', 'issuer', 'created_at', 'due_date', 'is_paid', 'total_amount')
     list_filter = ('is_paid', 'issuer', 'created_at')
     search_fields = ('invoice_number', 'order__id', 'order__user__email')
     ordering = ('-created_at',)
+    actions = ['generate_pdf_action']
 
     readonly_fields = ('pdf_preview', 'created_at', 'updated_at')
 
@@ -350,6 +351,20 @@ class InvoiceAdmin(admin.ModelAdmin):
         'invoice_number', 'order', 'issuer', 'created_at', 'updated_at',
         'is_paid', 'due_date', 'total_amount', 'currency', 'pdf_file', 'pdf_preview'
     )
+
+    def generate_pdf_action(self, request, queryset):
+        generated_count = 0
+        for invoice in queryset:
+            if not invoice.pdf_file:
+                invoice.generate_pdf()
+                generated_count += 1
+
+        if generated_count > 0:
+            self.message_user(request, f"Successfully generated PDF for {generated_count} invoice(s).", messages.SUCCESS)
+        else:
+            self.message_user(request, "No PDFs were generated. All selected invoices already have PDFs.", messages.INFO)
+
+    generate_pdf_action.short_description = "Generate PDF if not generated"
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)

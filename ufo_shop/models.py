@@ -9,7 +9,7 @@ import math
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.moduledrawers import HorizontalBarsDrawer
 
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.html import mark_safe
 from django.conf import settings
@@ -24,6 +24,38 @@ BANK_ACCOUNT = {
 }
 
 
+class UserManager(BaseUserManager):
+    """Custom user manager for User model with no username field."""
+    
+    def _create_user(self, email, phone, password, **extra_fields):
+        """Create and save a User with the given email, phone and password."""
+        if not email:
+            raise ValueError('The Email field must be set')
+        email = self.normalize_email(email)
+        user = self.model(email=email, phone=phone, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+    
+    def create_user(self, email, phone, password=None, **extra_fields):
+        """Create and save a regular User with the given email, phone and password."""
+        extra_fields.setdefault('is_staff', False)
+        extra_fields.setdefault('is_superuser', False)
+        return self._create_user(email, phone, password, **extra_fields)
+    
+    def create_superuser(self, email, phone, password, **extra_fields):
+        """Create and save a SuperUser with the given email, phone and password."""
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+        
+        return self._create_user(email, phone, password, **extra_fields)
+
+
 class User(AbstractUser):
     phone = models.CharField(max_length=15, verbose_name="Phone Number", blank=True, null=True)
     is_merchandiser = models.BooleanField(default=False, verbose_name="Is Merchandiser")
@@ -33,6 +65,9 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['phone']
+    
+    # Use the custom UserManager
+    objects = UserManager()
 
 
 class Location(models.Model):
@@ -543,6 +578,11 @@ class Invoice(models.Model):
     @classmethod
     def create_from_order(cls, order, issuer=None):
         """Create an invoice from an order"""
+        # Check if an invoice already exists for this order
+        existing_invoice = cls.objects.filter(order=order).first()
+        if existing_invoice:
+            return existing_invoice  # Return existing invoice instead of creating a new one
+
         if not issuer:
             # Get default issuer
             issuer = Issuer.objects.filter(is_default=True).first()
@@ -572,41 +612,59 @@ class Invoice(models.Model):
         return invoice
 
     def generate_pdf(self):
-        """Generate PDF version of the invoice"""
-        import tempfile
+        """Generate PDF version of the invoice using xhtml2pdf"""
         import os
-        from django.template.loader import render_to_string
-        from weasyprint import HTML
+        import tempfile
+        from io import BytesIO
         from django.core.files.base import ContentFile
         from django.conf import settings
+        from django.template.loader import get_template
+        from django.template import Context
+        from xhtml2pdf import pisa
+        from django.http import HttpResponse
 
-        # Create a temporary file
-        with tempfile.NamedTemporaryFile(suffix='.html') as temp_file:
-            # Render invoice template to HTML
-            context = {
-                'invoice': self,
-                'order': self.order,
-                'issuer': self.issuer,
-                'items': self.order.orderitem_set.all(),
-                'qr_code': self.order.get_payment_qr_code(),
-                'STATIC_ROOT': settings.STATIC_ROOT,
-                'MEDIA_ROOT': settings.MEDIA_ROOT
-            }
-            html_string = render_to_string('ufo_shop/invoice_pdf.html', context)
+        # Get order items
+        items = self.order.orderitem_set.all()
 
-            # Write HTML to temporary file
-            temp_file.write(html_string.encode('utf-8'))
-            temp_file.flush()
+        # Get QR code for payment
+        qr_code = self.order.get_payment_qr_code()
 
-            # Convert HTML to PDF
-            # Fix for pydyf.PDF.__init__() compatibility issue
-            # Use base_url to help WeasyPrint find static files
-            base_url = os.path.dirname(os.path.abspath(__file__))
-            html_doc = HTML(filename=temp_file.name, base_url=base_url)
-            pdf = html_doc.write_pdf(zoom=1)
+        # Create a BytesIO buffer to receive the PDF data
+        buffer = BytesIO()
 
-            # Save PDF to model
-            self.pdf_file.save(f"invoice_{self.invoice_number}.pdf", ContentFile(pdf), save=True)
+        # Prepare context for the template
+        context = {
+            'invoice': self,
+            'issuer': self.issuer,
+            'order': self.order,
+            'items': items,
+            'qr_code': qr_code,
+            'STATIC_ROOT': settings.STATIC_ROOT,
+        }
+
+        # Render the template
+        template = get_template('ufo_shop/invoice_pdf.html')
+        html = template.render(context)
+
+        # Create the PDF
+        pisa_status = pisa.CreatePDF(
+            html,                   # the HTML to convert
+            dest=buffer,            # the BytesIO buffer
+            encoding='utf-8'
+        )
+
+        # Check if PDF generation was successful
+        if pisa_status.err:
+            return False
+
+        # Get the PDF content from the BytesIO buffer
+        pdf_content = buffer.getvalue()
+        buffer.close()
+
+        # Save PDF to model
+        self.pdf_file.save(f"invoice_{self.invoice_number}.pdf", ContentFile(pdf_content), save=True)
+        
+        return True
 
 
 class News(models.Model):

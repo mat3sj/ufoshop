@@ -19,4 +19,6 @@ django-extensions
 ipython
 oauthlib
 requests_oauthlib
-weasyprint==60.2
+# weasyprint==60.2  # Replaced with ReportLab
+# reportlab==4.1.0  # Replaced with xhtml2pdf
+xhtml2pdf==0.2.13

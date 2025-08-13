@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.utils import timezone
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.db.models import Count, Sum, F, Q
 from ufo_shop.models import News
 from django.db.models.functions import TruncMonth, TruncDay
@@ -18,6 +18,27 @@ from ufo_shop.models import Item, Category, Picture, Order, OrderItem, Invoice, 
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy, reverse
 from ufo_shop.utils.emailing import ufoshop_send_email
+
+
+# Error handlers
+def handler404(request, exception):
+    """Custom 404 error handler - UFO Not Found"""
+    return render(request, '404.html', status=404)
+
+
+def handler500(request):
+    """Custom 500 error handler - Alien Malfunction"""
+    return render(request, '500.html', status=500)
+
+
+def handler403(request, exception):
+    """Custom 403 error handler - Alien Access Denied"""
+    return render(request, '403.html', status=403)
+
+
+def handler400(request, exception):
+    """Custom 400 error handler - Bad Alien Request"""
+    return render(request, '400.html', status=400)
 
 
 class CustomLoginView(LoginView):

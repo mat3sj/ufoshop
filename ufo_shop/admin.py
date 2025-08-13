@@ -336,7 +336,7 @@ class InvoiceAdmin(admin.ModelAdmin):
     list_filter = ('is_paid', 'issuer', 'created_at')
     search_fields = ('invoice_number', 'order__id', 'order__user__email')
     ordering = ('-created_at',)
-    actions = ['generate_pdf_action']
+    actions = ['generate_pdf_action', 'regenerate_pdf_action']
 
     readonly_fields = ('pdf_preview', 'created_at', 'updated_at')
 
@@ -365,6 +365,26 @@ class InvoiceAdmin(admin.ModelAdmin):
             self.message_user(request, "No PDFs were generated. All selected invoices already have PDFs.", messages.INFO)
 
     generate_pdf_action.short_description = "Generate PDF if not generated"
+    
+    def regenerate_pdf_action(self, request, queryset):
+        regenerated_count = 0
+        for invoice in queryset:
+            try:
+                # Regenerate PDF regardless of whether it already exists
+                success = invoice.generate_pdf()
+                if success:
+                    regenerated_count += 1
+                else:
+                    self.message_user(request, f"Failed to regenerate PDF for invoice {invoice.invoice_number}.", messages.ERROR)
+            except Exception as e:
+                self.message_user(request, f"Error regenerating PDF for invoice {invoice.invoice_number}: {e}", messages.ERROR)
+        
+        if regenerated_count > 0:
+            self.message_user(request, f"Successfully regenerated PDF for {regenerated_count} invoice(s).", messages.SUCCESS)
+        else:
+            self.message_user(request, "No PDFs were regenerated. Please check for errors.", messages.WARNING)
+    
+    regenerate_pdf_action.short_description = "Regenerate PDF (even if already exists)"
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)

@@ -1,0 +1,45 @@
+{% extends "ufo_shop/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "404 - UFO Not Found" %}{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="display-1 text-danger">404</h1>
+            <h2 class="mb-4">{% translate "UFO Not Found" %}</h2>
+            
+            <div class="mb-4">
+                <img src="{{ MEDIA_URL }}icons/favicon.png" alt="UFO" style="width: 150px; animation: float 3s ease-in-out infinite;">
+            </div>
+            
+            <p class="lead mb-4">{% translate "Houston, we have a problem! The UFO you're looking for has been abducted or never existed in the first place." %}</p>
+            
+            <div class="alert alert-warning">
+                <p>{% translate "Our alien tracking systems indicate that this UFO may have:" %}</p>
+                <ul class="text-start">
+                    <li>{% translate "Been captured by the Men in Black" %}</li>
+                    <li>{% translate "Entered a wormhole to another dimension" %}</li>
+                    <li>{% translate "Crashed in Roswell (again)" %}</li>
+                    <li>{% translate "Simply been a weather balloon all along" %}</li>
+                </ul>
+            </div>
+            
+            <p>{% translate "While our recovery team is searching the galaxy, why not return to our home planet?" %}</p>
+            
+            <a href="{% url 'home' %}" class="btn btn-success btn-lg mt-3">
+                <i class="bi bi-house-fill"></i> {% translate "Return to Earth" %}
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+        100% { transform: translateY(0px); }
+    }
+</style>
+{% endblock %}

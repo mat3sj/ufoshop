@@ -1,0 +1,44 @@
+{% extends "ufo_shop/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "500 - Alien Malfunction" %}{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="display-1 text-danger">500</h1>
+            <h2 class="mb-4">{% translate "Alien Malfunction" %}</h2>
+            
+            <div class="mb-4">
+                <img src="{{ MEDIA_URL }}icons/favicon.png" alt="UFO" style="width: 150px; animation: spin 3s linear infinite;">
+            </div>
+            
+            <p class="lead mb-4">{% translate "Our mothership has experienced an unexpected technical difficulty. The alien engineers are working on it!" %}</p>
+            
+            <div class="alert alert-danger">
+                <p>{% translate "Possible causes of this cosmic anomaly:" %}</p>
+                <ul class="text-start">
+                    <li>{% translate "Quantum flux in the server's dilithium crystals" %}</li>
+                    <li>{% translate "Unexpected encounter with an asteroid field of bugs" %}</li>
+                    <li>{% translate "The intern accidentally spilled coffee on the warp drive" %}</li>
+                    <li>{% translate "Our code was abducted by rival aliens" %}</li>
+                </ul>
+            </div>
+            
+            <p>{% translate "Our team of extraterrestrial engineers has been alerted and is working to restore normal operations. Meanwhile, why not try returning to our home planet?" %}</p>
+            
+            <a href="{% url 'home' %}" class="btn btn-success btn-lg mt-3">
+                <i class="bi bi-house-fill"></i> {% translate "Return to Earth" %}
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}

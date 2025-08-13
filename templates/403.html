@@ -1,0 +1,50 @@
+{% extends "ufo_shop/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "403 - Alien Access Denied" %}{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="display-1 text-danger">403</h1>
+            <h2 class="mb-4">{% translate "Alien Access Denied" %}</h2>
+            
+            <div class="mb-4">
+                <img src="{{ MEDIA_URL }}icons/favicon.png" alt="UFO" style="width: 150px; animation: shake 0.5s infinite;">
+            </div>
+            
+            <p class="lead mb-4">{% translate "Our security force field has blocked your entry! This area is restricted to authorized extraterrestrials only." %}</p>
+            
+            <div class="alert alert-danger">
+                <p>{% translate "Possible reasons for denial:" %}</p>
+                <ul class="text-start">
+                    <li>{% translate "Your security clearance is below Level 7" %}</li>
+                    <li>{% translate "You failed the alien DNA verification scan" %}</li>
+                    <li>{% translate "This area is under quarantine after the last cosmic incident" %}</li>
+                    <li>{% translate "You're from the wrong galaxy (we can be quite exclusive)" %}</li>
+                </ul>
+            </div>
+            
+            <p>{% translate "Please report to the nearest authentication station or return to public areas of our mothership." %}</p>
+            
+            <div class="mt-4">
+                <a href="{% url 'login' %}" class="btn btn-primary btn-lg me-2">
+                    <i class="bi bi-key-fill"></i> {% translate "Authenticate" %}
+                </a>
+                <a href="{% url 'home' %}" class="btn btn-success btn-lg">
+                    <i class="bi bi-house-fill"></i> {% translate "Return to Public Area" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+</style>
+{% endblock %}

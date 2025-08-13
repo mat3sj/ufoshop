@@ -1,0 +1,45 @@
+{% extends "ufo_shop/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "400 - Bad Alien Request" %}{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="display-1 text-danger">400</h1>
+            <h2 class="mb-4">{% translate "Bad Alien Request" %}</h2>
+            
+            <div class="mb-4">
+                <img src="{{ MEDIA_URL }}icons/favicon.png" alt="UFO" style="width: 150px; animation: wobble 2s ease-in-out infinite;">
+            </div>
+            
+            <p class="lead mb-4">{% translate "Our UFO's universal translator couldn't understand your request. It seems there was a communication error between our species!" %}</p>
+            
+            <div class="alert alert-warning">
+                <p>{% translate "Possible translation errors:" %}</p>
+                <ul class="text-start">
+                    <li>{% translate "You may have been speaking Klingon instead of HTML" %}</li>
+                    <li>{% translate "Your request contained too many cosmic rays" %}</li>
+                    <li>{% translate "Our alien AI is still learning Earth syntax" %}</li>
+                    <li>{% translate "You tried to use a deprecated intergalactic protocol" %}</li>
+                </ul>
+            </div>
+            
+            <p>{% translate "Please adjust your communication frequency and try again, or return to our mothership for further instructions." %}</p>
+            
+            <a href="{% url 'home' %}" class="btn btn-success btn-lg mt-3">
+                <i class="bi bi-house-fill"></i> {% translate "Return to Mothership" %}
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes wobble {
+        0%, 100% { transform: translateX(0) rotate(0); }
+        25% { transform: translateX(-10px) rotate(-5deg); }
+        75% { transform: translateX(10px) rotate(5deg); }
+    }
+</style>
+{% endblock %}

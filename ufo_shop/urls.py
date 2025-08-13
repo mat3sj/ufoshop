@@ -22,6 +22,12 @@ from django.conf.urls.i18n import i18n_patterns
 
 from ufo_shop import views
 
+# Register custom error handlers
+handler404 = 'ufo_shop.views.handler404'
+handler500 = 'ufo_shop.views.handler500'
+handler403 = 'ufo_shop.views.handler403'
+handler400 = 'ufo_shop.views.handler400'
+
 urlpatterns = [
     # Language selection
     path('i18n/', include('django.conf.urls.i18n')),

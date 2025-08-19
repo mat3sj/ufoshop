@@ -1,5 +1,5 @@
 {% extends "ufo_shop/base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}{% translate "403 - Alien Access Denied" %}{% endblock %}
 
@@ -11,7 +11,7 @@
             <h2 class="mb-4">{% translate "Alien Access Denied" %}</h2>
             
             <div class="mb-4">
-                <img src="{{ MEDIA_URL }}icons/favicon.png" alt="UFO" style="width: 150px; animation: shake 0.5s infinite;">
+                <img src="{% static 'media/icons/favicon.png' %}" alt="UFO" style="width: 150px; animation: shake 0.5s infinite;">
             </div>
             
             <p class="lead mb-4">{% translate "Our security force field has blocked your entry! This area is restricted to authorized extraterrestrials only." %}</p>

@@ -1,5 +1,5 @@
 {% extends "ufo_shop/base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}{% translate "500 - Alien Malfunction" %}{% endblock %}
 
@@ -11,7 +11,7 @@
             <h2 class="mb-4">{% translate "Alien Malfunction" %}</h2>
             
             <div class="mb-4">
-                <img src="{{ MEDIA_URL }}icons/favicon.png" alt="UFO" style="width: 150px; animation: spin 3s linear infinite;">
+                <img src="{% static 'media/icons/favicon.png' %}" alt="UFO" style="width: 150px; animation: spin 3s linear infinite;">
             </div>
             
             <p class="lead mb-4">{% translate "Our mothership has experienced an unexpected technical difficulty. The alien engineers are working on it!" %}</p>

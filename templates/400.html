@@ -1,5 +1,5 @@
 {% extends "ufo_shop/base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}{% translate "400 - Bad Alien Request" %}{% endblock %}
 
@@ -11,7 +11,7 @@
             <h2 class="mb-4">{% translate "Bad Alien Request" %}</h2>
             
             <div class="mb-4">
-                <img src="{{ MEDIA_URL }}icons/favicon.png" alt="UFO" style="width: 150px; animation: wobble 2s ease-in-out infinite;">
+                <img src="{% static 'media/icons/favicon.png' %}" alt="UFO" style="width: 150px; animation: wobble 2s ease-in-out infinite;">
             </div>
             
             <p class="lead mb-4">{% translate "Our UFO's universal translator couldn't understand your request. It seems there was a communication error between our species!" %}</p>

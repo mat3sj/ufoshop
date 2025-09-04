@@ -77,7 +77,11 @@
         </ul>
         <p>You can scan the QR code below to complete your payment:</p>
         <div style="margin: 20px 0;">
-          {{ order.get_payment_qr_code }}
+          {% if qr_cid %}
+            <img src="cid:{{ qr_cid }}" alt="Payment QR Code" style="max-width: 100%; height: auto;" />
+          {% else %}
+            {{ order.get_payment_qr_code }}
+          {% endif %}
         </div>
       </div>
     </div>

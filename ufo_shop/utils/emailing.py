@@ -90,3 +90,72 @@ def send_template_email(
 
     # Send the email
     ufoshop_send_email(recipient_list, subject, html_message, plain_message)
+
+
+def send_order_confirmation_email(order, request=None):
+    """Send order confirmation email with optional inline QR code, reusable from views and admin.
+
+    Args:
+        order: Order instance
+        request: Optional HttpRequest to build absolute URLs
+    """
+    from django.urls import reverse
+    from django.template.loader import render_to_string
+    from django.core.mail import EmailMultiAlternatives
+    from email.mime.image import MIMEImage
+    from django.conf import settings
+
+    # Items and URL
+    items = order.orderitem_set.all().select_related('item')
+    try:
+        order_url = request.build_absolute_uri(
+            reverse('order_confirmation', kwargs={'pk': order.id})
+        ) if request else reverse('order_confirmation', kwargs={'pk': order.id})
+    except Exception:
+        order_url = reverse('order_confirmation', kwargs={'pk': order.id})
+
+    # BANK_ACCOUNT imported from models to avoid circular import of views
+    from ufo_shop.models import BANK_ACCOUNT
+
+    context = {
+        'order': order,
+        'items': items,
+        'user': order.user,
+        'order_url': order_url,
+        'BANK_ACCOUNT': BANK_ACCOUNT,
+    }
+
+    # Plain part
+    plain_message = render_to_string('ufo_shop/email/order_confirmation.txt', context)
+
+    # QR handling
+    qr_cid = None
+    qr_bytes = b''
+    if order.payment_method == 'qr_code':
+        try:
+            qr_bytes = order.get_payment_qr_png_bytes()
+            if qr_bytes:
+                qr_cid = f"qr-{order.id}@ufo-shop"
+        except Exception:
+            qr_bytes = b''
+            qr_cid = None
+
+    context_with_qr = {**context, 'qr_cid': qr_cid} if qr_cid else context
+    html_message = render_to_string('ufo_shop/email/order_confirmation.html', context_with_qr)
+
+    # Build and send
+    msg = EmailMultiAlternatives(
+        subject='Your Order Confirmation',
+        body=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[order.contact_email],
+    )
+    msg.attach_alternative(html_message, 'text/html')
+
+    if qr_cid and qr_bytes:
+        image = MIMEImage(qr_bytes, _subtype='png')
+        image.add_header('Content-ID', f'<{qr_cid}>')
+        image.add_header('Content-Disposition', 'inline', filename=f'order_{order.id}_qr.png')
+        msg.attach(image)
+
+    msg.send(fail_silently=False)

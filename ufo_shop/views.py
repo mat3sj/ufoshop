@@ -17,7 +17,7 @@ from ufo_shop import forms
 from ufo_shop.models import Item, Category, Picture, Order, OrderItem, Invoice, BANK_ACCOUNT
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy, reverse
-from ufo_shop.utils.emailing import ufoshop_send_email
+from ufo_shop.utils.emailing import ufoshop_send_email, send_order_confirmation_email
 
 
 # Error handlers
@@ -596,29 +596,8 @@ class CheckoutView(LoginRequiredMixin, FormView):
         return redirect('order_confirmation', pk=cart.id)
 
     def send_order_confirmation(self, order):
-        """Send order confirmation email"""
-        items = order.orderitem_set.all().select_related('item')
-
-        # Build the order URL
-        order_url = self.request.build_absolute_uri(
-            reverse('order_confirmation', kwargs={'pk': order.id})
-        )
-
-        # Create context for email template
-        context = {
-            'order': order,
-            'items': items,
-            'user': self.request.user,
-            'order_url': order_url,
-            'BANK_ACCOUNT': BANK_ACCOUNT,
-        }
-
-        ufoshop_send_email(
-            recipient_list=[order.contact_email],
-            subject='Your Order Confirmation',
-            html_message=render_to_string('ufo_shop/email/order_confirmation.html', context),
-            plain_message=render_to_string('ufo_shop/email/order_confirmation.txt', context),
-        )
+        """Send order confirmation email using shared utility"""
+        send_order_confirmation_email(order, request=self.request)
 
 
 class OrderConfirmationView(LoginRequiredMixin, DetailView):

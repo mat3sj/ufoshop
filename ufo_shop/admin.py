@@ -5,6 +5,7 @@ from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
 from django.utils.safestring import mark_safe
 
 from ufo_shop.models import *
+from ufo_shop.utils.emailing import send_order_confirmation_email
 
 
 @admin.register(User)
@@ -128,6 +129,7 @@ class LocationAdmin(admin.ModelAdmin):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'created_at', 'user', 'status', '_items_link')
+    actions = ['resend_confirmation_email']
 
     def _items_link(self, obj):
         count = obj.orderitem_set.count()
@@ -135,6 +137,24 @@ class OrderAdmin(admin.ModelAdmin):
         return format_html('<a href="{}">{} ({})</a>', url, "Items", count)
 
     _items_link.short_description = 'Items'
+
+    def resend_confirmation_email(self, request, queryset):
+
+        sent = 0
+        errors = []
+        for order in queryset:
+            try:
+                send_order_confirmation_email(order, request=request)
+                sent += 1
+            except Exception as e:
+                errors.append((order.id, str(e)))
+
+        if sent:
+            self.message_user(request, f"Resent confirmation email for {sent} order(s).", level=messages.SUCCESS)
+        if errors:
+            self.message_user(request, f"Errors for {len(errors)} order(s): " + ", ".join([f"#{oid}: {err}" for oid, err in errors]), level=messages.ERROR)
+
+    resend_confirmation_email.short_description = 'Resend confirmation email'
 
 
 @admin.register(OrderItem)

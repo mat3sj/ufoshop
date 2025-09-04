@@ -249,47 +249,50 @@ class Order(models.Model):
         return iban
 
     def get_payment_qr_code(self):
-        """Generate a stylish QR code for payment with rounded dots"""
+        """Generate a stylish QR code for payment and return as an <img> tag with base64 data URI (for web rendering)."""
         if not self.id:
             return None
 
-        # Create QR code data
+        # Generate PNG bytes
+        png_bytes = self.get_payment_qr_png_bytes()
+        if not png_bytes:
+            return ''
+        img_str = base64.b64encode(png_bytes).decode()
+        return mark_safe(f'<img src="data:image/png;base64,{img_str}" alt="Payment QR Code" class="img-fluid">')
+
+    def _build_qr_payload(self):
+        """Build the QR payload string according to Czech QR payment standard."""
         account_number = BANK_ACCOUNT['account_number']
-        # Convert account number to IBAN format
         iban = self._convert_to_iban(account_number)
         amount = float(self.total)
         currency = BANK_ACCOUNT['currency']
         message = f"Order #{self.id} - {self.contact_email}"
         variable_symbol = str(self.id)
-
-
         # Format the QR code data according to the Czech QR payment standard
-        qr_data = f"SPD*1.0*ACC:{iban}*AM:{amount:.2f}*CC:{currency}*MSG:{message}*X-VS:{variable_symbol}*RN:Mates-UfoShop"
+        return f"SPD*1.0*ACC:{iban}*AM:{amount:.2f}*CC:{currency}*MSG:{message}*X-VS:{variable_symbol}*RN:Mates-UfoShop"
 
-        # Create QR code with custom settings for rounded dots and medium error correction
+    def get_payment_qr_png_bytes(self) -> bytes:
+        """Generate a PNG image (bytes) for the payment QR code (suitable for email attachments)."""
+        if not self.id:
+            return b''
+        qr_data = self._build_qr_payload()
         qr = qrcode.QRCode(
-            version=None,  # Allow automatic version selection based on data size
-            error_correction=qrcode.constants.ERROR_CORRECT_M,  # Medium error correction for smaller size
-            box_size=6,  # Smaller box size for a more compact QR code
-            border=2,  # Minimum recommended border
-            image_factory=StyledPilImage,  # Use StyledPilImage for custom styling
+            version=None,
+            error_correction=qrcode.constants.ERROR_CORRECT_M,
+            box_size=6,
+            border=2,
+            image_factory=StyledPilImage,
         )
         qr.add_data(qr_data)
         qr.make(fit=True)
-
-        # Generate the QR code image with rounded modules
         img = qr.make_image(
-            module_drawer=HorizontalBarsDrawer(),  # Use RoundedModuleDrawer for rounded dots
+            module_drawer=HorizontalBarsDrawer(),
             fill_color="black",
             back_color="white"
         )
-
-        # Convert to base64 for embedding in HTML
         buffered = BytesIO()
         img.save(buffered, format="PNG")
-        img_str = base64.b64encode(buffered.getvalue()).decode()
-
-        return mark_safe(f'<img src="data:image/png;base64,{img_str}" alt="Payment QR Code" class="img-fluid">')
+        return buffered.getvalue()
 
 
 class OrderItem(models.Model):

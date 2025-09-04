@@ -616,10 +616,6 @@ msgstr "Registrace"
 msgid "Filter Items"
 msgstr "Filtrovat položky"
 
-#: templates/ufo_shop/shop.html:14 templates/ufo_shop/item_card.html:23 templates/ufo_shop/item_detail.html:167
-msgid "Category"
-msgstr "Kategorie"
-
 #: templates/ufo_shop/shop.html:17
 msgid "All Categories"
 msgstr "Všechny kategorie"

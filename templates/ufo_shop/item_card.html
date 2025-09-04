@@ -20,11 +20,11 @@
       <div class="card-body">
         <h5 class="card-title">{{ item.name }}</h5>
         <p class="card-text"><small class="text-muted">
-          <strong>Category:</strong> {{ item.category.all|join:", " }}
+          <strong>{% trans "Category" %}:</strong> {{ item.category.all|join:", " }}
         </small></p>
         <p class="card-text">{{ item.short_description }}</p>
         <p class="card-text"><small class="text-muted">
-          <strong>Created By:</strong> {{ item.merchandiser.email }}
+          <strong>{% trans "Created By" %}:</strong> {{ item.merchandiser.email }}
         </small></p>
       </div>
     </div>

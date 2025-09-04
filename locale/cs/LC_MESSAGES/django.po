@@ -1,0 +1,827 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: UFO Shop\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-08-25 06:29+0000\n"
+"PO-Revision-Date: 2025-05-12 07:30+0000\n"
+"Last-Translator: Admin <admin@example.com>\n"
+"Language-Team: Czech <cs@example.com>\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n "
+"<= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
+
+#: templates/400.html:4
+msgid "400 - Bad Alien Request"
+msgstr "400 - Špatný mimozemský požadavek"
+
+#: templates/400.html:11
+msgid "Bad Alien Request"
+msgstr "Špatný mimozemský požadavek"
+
+#: templates/400.html:17
+msgid ""
+"Our UFO's universal translator couldn't understand your request. It seems "
+"there was a communication error between our species!"
+msgstr "Univerzální překladač našeho UFO nerozuměl vašemu požadavku. Zdá se, že došlo ke komunikační chybě mezi našimi druhy!"
+
+#: templates/400.html:20
+msgid "Possible translation errors:"
+msgstr "Možné chyby překladu:"
+
+#: templates/400.html:22
+msgid "You may have been speaking Klingon instead of HTML"
+msgstr "Možná jste mluvili klingonsky místo HTML"
+
+#: templates/400.html:23
+msgid "Your request contained too many cosmic rays"
+msgstr "Váš požadavek obsahoval příliš mnoho kosmického záření"
+
+#: templates/400.html:24
+msgid "Our alien AI is still learning Earth syntax"
+msgstr "Naše mimozemská AI se stále učí pozemskou syntaxi"
+
+#: templates/400.html:25
+msgid "You tried to use a deprecated intergalactic protocol"
+msgstr "Pokusili jste se použít zastaralý mezihvězdný protokol"
+
+#: templates/400.html:29
+msgid ""
+"Please adjust your communication frequency and try again, or return to our "
+"mothership for further instructions."
+msgstr "Upravte prosím svou komunikační frekvenci a zkuste to znovu, nebo se vraťte na naši mateřskou loď pro další instrukce."
+
+#: templates/400.html:32
+msgid "Return to Mothership"
+msgstr "Vrátit se na mateřskou loď"
+
+#: templates/403.html:4
+msgid "403 - Alien Access Denied"
+msgstr "403 - Přístup mimozemšťanům odepřen"
+
+#: templates/403.html:11
+msgid "Alien Access Denied"
+msgstr "Přístup odepřen"
+
+#: templates/403.html:17
+msgid ""
+"Our security force field has blocked your entry! This area is restricted to "
+"authorized extraterrestrials only."
+msgstr "Náš bezpečnostní silový štít zablokoval váš vstup! Tato oblast je vyhrazena pouze pro autorizované mimozemšťany."
+
+#: templates/403.html:20
+msgid "Possible reasons for denial:"
+msgstr "Možné důvody odmítnutí:"
+
+#: templates/403.html:22
+msgid "Your security clearance is below Level 7"
+msgstr "Vaše bezpečnostní oprávnění je nižší než úroveň 7"
+
+#: templates/403.html:23
+msgid "You failed the alien DNA verification scan"
+msgstr "Neuspěli jste při ověření DNA mimozemšťana"
+
+#: templates/403.html:24
+msgid "This area is under quarantine after the last cosmic incident"
+msgstr "Tato oblast je v karanténě po posledním kosmickém incidentu"
+
+#: templates/403.html:25
+msgid "You're from the wrong galaxy (we can be quite exclusive)"
+msgstr "Jste ze špatné galaxie (umíme být docela exkluzivní)"
+
+#: templates/403.html:29
+msgid ""
+"Please report to the nearest authentication station or return to public "
+"areas of our mothership."
+msgstr "Nahlaste se prosím na nejbližší autentizační stanici nebo se vraťte do veřejných prostor naší mateřské lodi."
+
+#: templates/403.html:33
+msgid "Authenticate"
+msgstr "Přihlásit se"
+
+#: templates/403.html:36
+msgid "Return to Public Area"
+msgstr "Vrátit se do veřejné části"
+
+#: templates/404.html:4
+msgid "404 - UFO Not Found"
+msgstr "404 - UFO nenalezeno"
+
+#: templates/404.html:11
+msgid "UFO Not Found"
+msgstr "UFO nenalezeno"
+
+#: templates/404.html:17
+msgid ""
+"Houston, we have a problem! The UFO you're looking for has been abducted or "
+"never existed in the first place."
+msgstr "Houstone, máme problém! UFO, které hledáte, bylo uneseno nebo nikdy neexistovalo."
+
+#: templates/404.html:20
+msgid "Our alien tracking systems indicate that this UFO may have:"
+msgstr "Naše mimozemské sledovací systémy naznačují, že toto UFO mohlo:"
+
+#: templates/404.html:22
+msgid "Been captured by the Men in Black"
+msgstr "Být zajato Muži v černém"
+
+#: templates/404.html:23
+msgid "Entered a wormhole to another dimension"
+msgstr "Vstoupit do červí díry do jiné dimenze"
+
+#: templates/404.html:24
+msgid "Crashed in Roswell (again)"
+msgstr "Havarovat v Roswellu (zase)"
+
+#: templates/404.html:25
+msgid "Simply been a weather balloon all along"
+msgstr "Být celou dobu jen meteorologickým balónem"
+
+#: templates/404.html:29
+msgid ""
+"While our recovery team is searching the galaxy, why not return to our home "
+"planet?"
+msgstr "Zatímco náš záchranný tým pročesává galaxii, co se vrátit na naši domovskou planetu?"
+
+#: templates/404.html:32 templates/500.html:32
+msgid "Return to Earth"
+msgstr "Vrátit se na Zemi"
+
+#: templates/500.html:4
+msgid "500 - Alien Malfunction"
+msgstr "500 - Mimozemská porucha"
+
+#: templates/500.html:11
+msgid "Alien Malfunction"
+msgstr "Mimozemská porucha"
+
+#: templates/500.html:17
+msgid ""
+"Our mothership has experienced an unexpected technical difficulty. The alien "
+"engineers are working on it!"
+msgstr "Naše mateřská loď zaznamenala neočekávané technické potíže. Mimozemští inženýři na tom pracují!"
+
+#: templates/500.html:20
+msgid "Possible causes of this cosmic anomaly:"
+msgstr "Možné příčiny této kosmické anomálie:"
+
+#: templates/500.html:22
+msgid "Quantum flux in the server's dilithium crystals"
+msgstr "Kvantový tok v dilithiových krystalech serveru"
+
+#: templates/500.html:23
+msgid "Unexpected encounter with an asteroid field of bugs"
+msgstr "Neočekávané setkání s asteroidovým polem bugů"
+
+#: templates/500.html:24
+msgid "The intern accidentally spilled coffee on the warp drive"
+msgstr "Stážista omylem rozlil kávu na warp pohon"
+
+#: templates/500.html:25
+msgid "Our code was abducted by rival aliens"
+msgstr "Náš kód byl unesen konkurenčními mimozemšťany"
+
+#: templates/500.html:29
+msgid ""
+"Our team of extraterrestrial engineers has been alerted and is working to "
+"restore normal operations. Meanwhile, why not try returning to our home "
+"planet?"
+msgstr "Náš tým mimozemských inženýrů byl upozorněn a pracuje na obnovení běžného provozu. Mezitím se můžete vrátit na naši domovskou planetu."
+
+#: templates/ufo_shop/base.html:8
+msgid "UFO Shop"
+msgstr "UFO Obchod"
+
+#: templates/ufo_shop/cart.html:5
+msgid "Your Cart"
+msgstr "Váš košík"
+
+#: templates/ufo_shop/cart.html:9
+#, fuzzy
+#| msgid "Your Cart"
+msgid "Your Shopping Cart"
+msgstr "Váš nákupní košík"
+
+#: templates/ufo_shop/cart.html:16
+#: templates/ufo_shop/order_confirmation.html:45
+#, fuzzy
+#| msgid "Product Details"
+msgid "Product"
+msgstr "Produkt"
+
+#: templates/ufo_shop/cart.html:17 templates/ufo_shop/item_form.html:29
+#: templates/ufo_shop/merchandiser_shop.html:54
+#: templates/ufo_shop/order_confirmation.html:48
+msgid "Price"
+msgstr "Cena"
+
+#: templates/ufo_shop/cart.html:18 templates/ufo_shop/checkout.html:39
+#: templates/ufo_shop/order_confirmation.html:46
+msgid "Quantity"
+msgstr "Množství"
+
+#: templates/ufo_shop/cart.html:19 templates/ufo_shop/checkout.html:58
+#: templates/ufo_shop/order_confirmation.html:49
+#: templates/ufo_shop/order_confirmation.html:82
+#: templates/ufo_shop/order_history.html:18
+msgid "Total"
+msgstr "Celkem"
+
+#: templates/ufo_shop/cart.html:20 templates/ufo_shop/order_history.html:19
+msgid "Actions"
+msgstr "Akce"
+
+#: templates/ufo_shop/cart.html:37 templates/ufo_shop/cart.html:53
+#: templates/ufo_shop/cart.html:74 templates/ufo_shop/cart.html:79
+#: templates/ufo_shop/cart.html:84 templates/ufo_shop/checkout.html:41
+#: templates/ufo_shop/checkout.html:51 templates/ufo_shop/checkout.html:55
+#: templates/ufo_shop/checkout.html:59
+#: templates/ufo_shop/email/order_confirmation.html:33
+#: templates/ufo_shop/email/order_confirmation.html:45
+#: templates/ufo_shop/email/order_confirmation.html:52
+#: templates/ufo_shop/email/order_confirmation.html:56
+#: templates/ufo_shop/email/order_confirmation.html:60
+#: templates/ufo_shop/email/order_confirmation.txt:19
+#: templates/ufo_shop/email/order_confirmation.txt:22
+#: templates/ufo_shop/email/order_confirmation.txt:23
+#: templates/ufo_shop/email/order_confirmation.txt:24
+#: templates/ufo_shop/item_detail.html:111 templates/ufo_shop/item_form.html:29
+#: templates/ufo_shop/merchandiser_shop.html:54
+#: templates/ufo_shop/order_confirmation.html:67
+#: templates/ufo_shop/order_confirmation.html:68
+#: templates/ufo_shop/order_confirmation.html:75
+#: templates/ufo_shop/order_confirmation.html:79
+#: templates/ufo_shop/order_confirmation.html:83
+#: templates/ufo_shop/order_history.html:40
+msgid "CZK"
+msgstr "Kč"
+
+#: templates/ufo_shop/cart.html:64
+msgid "Remove"
+msgstr "Odstranit"
+
+#: templates/ufo_shop/cart.html:73
+msgid "Subtotal:"
+msgstr "Mezisoučet:"
+
+#: templates/ufo_shop/cart.html:78
+msgid "Shipping:"
+msgstr "Doprava:"
+
+#: templates/ufo_shop/cart.html:83
+#, fuzzy
+#| msgid "Total"
+msgid "Total:"
+msgstr "Celkem:"
+
+#: templates/ufo_shop/cart.html:96
+#: templates/ufo_shop/order_confirmation.html:130
+#: templates/ufo_shop/order_history.html:76
+msgid "Continue Shopping"
+msgstr "Pokračovat v nakupování"
+
+#: templates/ufo_shop/cart.html:99
+msgid "Proceed to Checkout"
+msgstr "Přejít k pokladně"
+
+#: templates/ufo_shop/cart.html:107
+msgid "Your cart is empty."
+msgstr "Váš košík je prázdný."
+
+#: templates/ufo_shop/cart.html:108 templates/ufo_shop/order_history.html:67
+msgid "Start Shopping"
+msgstr "Začít nakupovat"
+
+#: templates/ufo_shop/checkout.html:5 templates/ufo_shop/checkout.html:9
+msgid "Checkout"
+msgstr "Pokladna"
+
+#: templates/ufo_shop/checkout.html:15
+msgid "Shipping & Payment Information"
+msgstr "Informace o dopravě a platbě"
+
+#: templates/ufo_shop/checkout.html:29
+#: templates/ufo_shop/order_confirmation.html:40
+msgid "Order Summary"
+msgstr "Souhrn objednávky"
+
+#: templates/ufo_shop/checkout.html:33
+msgid "Items"
+msgstr "Položky"
+
+#: templates/ufo_shop/checkout.html:50
+#: templates/ufo_shop/order_confirmation.html:74
+#, fuzzy
+#| msgid "Total"
+msgid "Subtotal"
+msgstr "Mezisoučet"
+
+#: templates/ufo_shop/checkout.html:54
+#: templates/ufo_shop/order_confirmation.html:78
+msgid "Shipping"
+msgstr "Doprava"
+
+#: templates/ufo_shop/checkout.html:65
+msgid ""
+"By completing your purchase, you agree to our Terms of Service and Privacy "
+"Policy."
+msgstr "Dokončením nákupu souhlasíte s našimi Obchodními podmínkami a Zásadami ochrany osobních údajů."
+
+#: templates/ufo_shop/checkout.html:75
+#, fuzzy
+#| msgid "Add to Cart"
+msgid "Back to Cart"
+msgstr "Zpět do košíku"
+
+#: templates/ufo_shop/email/order_confirmation.html:42
+#: templates/ufo_shop/order_confirmation.html:64
+msgid "Not specified"
+msgstr "Neuvedeno"
+
+#: templates/ufo_shop/footer.html:5
+msgid "© 2025 UfoShop - All Rights Reserved"
+msgstr "© 2025 UfoObchod - Všechna práva vyhrazena"
+
+#: templates/ufo_shop/home.html:5 templates/ufo_shop/navbar.html:15
+msgid "Home"
+msgstr "Domů"
+
+#: templates/ufo_shop/home.html:12
+msgid "Welcome to the Shop"
+msgstr "Vítejte v obchodě"
+
+#: templates/ufo_shop/home.html:13
+msgid "Start exploring our amazing products!"
+msgstr "Začněte prozkoumávat naše úžasné produkty!"
+
+#: templates/ufo_shop/home.html:20
+msgid "Top Sellers"
+msgstr "Nejprodávanější"
+
+#: templates/ufo_shop/home.html:33 templates/ufo_shop/home.html:72
+#: templates/ufo_shop/item_detail.html:74
+#: templates/ufo_shop/item_detail.html:88 templates/ufo_shop/item_form.html:23
+#: templates/ufo_shop/merchandiser_shop.html:49
+msgid "No image available"
+msgstr "Obrázek není k dispozici"
+
+#: templates/ufo_shop/home.html:40
+#, fuzzy
+#| msgid "View Sales Statistics"
+msgid "View Details"
+msgstr "Zobrazit detail"
+
+#: templates/ufo_shop/home.html:46 templates/ufo_shop/merchandiser_shop.html:94
+msgid "No items available."
+msgstr "Žádné položky k dispozici."
+
+#: templates/ufo_shop/home.html:56
+msgid "Latest News"
+msgstr "Aktuální novinky"
+
+#: templates/ufo_shop/home.html:93
+#, fuzzy
+#| msgid "No items available."
+msgid "No news available."
+msgstr "Žádné novinky k dispozici."
+
+#: templates/ufo_shop/home.html:101
+#, fuzzy
+#| msgid "Related Products"
+msgid "Browse All Products"
+msgstr "Procházet všechny produkty"
+
+#: templates/ufo_shop/item_card.html:12 templates/ufo_shop/item_card.html:17
+#, fuzzy
+#| msgid "No image available"
+msgid "No image"
+msgstr "Bez obrázku"
+
+#: templates/ufo_shop/item_detail.html:6
+#: templates/ufo_shop/item_detail.html:164
+msgid "Product Details"
+msgstr "Detaily produktu"
+
+#: templates/ufo_shop/item_detail.html:79
+msgid "Click to view gallery"
+msgstr "Klikněte pro zobrazení galerie"
+
+#: templates/ufo_shop/item_detail.html:115
+msgid "Available Colors"
+msgstr "Dostupné barvy"
+
+#: templates/ufo_shop/item_detail.html:118
+msgid "Default"
+msgstr "Výchozí"
+
+#: templates/ufo_shop/item_detail.html:130
+msgid "Available"
+msgstr "Dostupné"
+
+#: templates/ufo_shop/item_detail.html:146
+msgid "Add to Cart"
+msgstr "Přidat do košíku"
+
+#: templates/ufo_shop/item_detail.html:152
+msgid "Login to Add to Cart"
+msgstr "Přihlaste se pro přidání do košíku"
+
+#: templates/ufo_shop/item_detail.html:158
+msgid "Edit Item"
+msgstr "Upravit položku"
+
+#: templates/ufo_shop/item_detail.html:166
+msgid "ID"
+msgstr "ID"
+
+#: templates/ufo_shop/item_detail.html:167
+msgid "Category"
+msgstr "Kategorie"
+
+#: templates/ufo_shop/item_detail.html:168
+msgid "Stock"
+msgstr "Skladem"
+
+#: templates/ufo_shop/item_detail.html:169
+msgid "Created"
+msgstr "Vytvořeno"
+
+#: templates/ufo_shop/item_detail.html:177
+msgid "Related Products"
+msgstr "Související produkty"
+
+#: templates/ufo_shop/item_detail.html:193
+msgid "Image Gallery"
+msgstr "Galerie obrázků"
+
+#: templates/ufo_shop/item_detail.html:203
+#: templates/ufo_shop/item_detail.html:205
+#: templates/ufo_shop/item_detail.html:207
+msgid "Image"
+msgstr "Obrázek"
+
+#: templates/ufo_shop/item_detail.html:216
+msgid "Previous"
+msgstr "Předchozí"
+
+#: templates/ufo_shop/item_detail.html:220
+msgid "Next"
+msgstr "Další"
+
+#: templates/ufo_shop/item_detail.html:226
+msgid "Close"
+msgstr "Zavřít"
+
+#: templates/ufo_shop/item_form.html:14
+#, fuzzy
+#| msgid "Add Color Variant"
+msgid "Creating Color Variant For"
+msgstr "Přidat barevnou variantu"
+
+#: templates/ufo_shop/item_form.html:30
+#: templates/ufo_shop/merchandiser_shop.html:56
+msgid "Description"
+msgstr ""
+
+#: templates/ufo_shop/item_form.html:44
+msgid "Existing Images"
+msgstr ""
+
+#: templates/ufo_shop/item_form.html:45
+msgid "Select images to delete"
+msgstr ""
+
+#: templates/ufo_shop/item_form.html:57
+msgid "Delete"
+msgstr ""
+
+#: templates/ufo_shop/item_form.html:66
+msgid "Delete Selected Images"
+msgstr ""
+
+#: templates/ufo_shop/login.html:6 templates/ufo_shop/login.html:15
+#: templates/ufo_shop/navbar.html:55
+msgid "Login"
+msgstr "Přihlásit se"
+
+#: templates/ufo_shop/login.html:25
+msgid "Don't have an account?"
+msgstr "Nemáte účet?"
+
+#: templates/ufo_shop/login.html:26
+msgid "Sign up"
+msgstr "Zaregistrovat se"
+
+#: templates/ufo_shop/merchandiser_shop.html:4
+#: templates/ufo_shop/navbar.html:18
+msgid "Shop"
+msgstr "Obchod"
+
+#: templates/ufo_shop/merchandiser_shop.html:9
+msgid "My items"
+msgstr "Moje položky"
+
+#: templates/ufo_shop/merchandiser_shop.html:11
+msgid "View Sales Statistics"
+msgstr "Zobrazit statistiky prodeje"
+
+#: templates/ufo_shop/merchandiser_shop.html:12
+msgid "Add New Item"
+msgstr "Přidat novou položku"
+
+#: templates/ufo_shop/merchandiser_shop.html:22
+msgid "Variant"
+msgstr "Varianta"
+
+#: templates/ufo_shop/merchandiser_shop.html:25
+msgid "Orphaned Variant"
+msgstr "Osiřelá varianta"
+
+#: templates/ufo_shop/merchandiser_shop.html:30
+#: templates/ufo_shop/merchandiser_shop.html:77
+msgid "Edit"
+msgstr "Upravit"
+
+#: templates/ufo_shop/merchandiser_shop.html:33
+#: templates/ufo_shop/merchandiser_shop.html:80
+#: templates/ufo_shop/order_history.html:48
+msgid "View"
+msgstr "Zobrazit"
+
+#: templates/ufo_shop/merchandiser_shop.html:37
+msgid "Add Color Variant"
+msgstr "Přidat barevnou variantu"
+
+#: templates/ufo_shop/merchandiser_shop.html:55
+#: templates/ufo_shop/merchandiser_shop.html:74
+#: templates/ufo_shop/order_confirmation.html:102
+msgid "Amount"
+msgstr ""
+
+#: templates/ufo_shop/merchandiser_shop.html:58
+msgid "Color"
+msgstr ""
+
+#: templates/ufo_shop/merchandiser_shop.html:65
+msgid "Color Variants"
+msgstr "Barevné varianty"
+
+#: templates/ufo_shop/navbar.html:26
+msgid "Cart"
+msgstr "Košík"
+
+#: templates/ufo_shop/navbar.html:35 templates/ufo_shop/order_history.html:4
+#: templates/ufo_shop/order_history.html:8
+msgid "My Orders"
+msgstr "Moje objednávky"
+
+#: templates/ufo_shop/navbar.html:36 templates/ufo_shop/profile.html:5
+#: templates/ufo_shop/profile.html:14
+msgid "Profile"
+msgstr "Profil"
+
+#: templates/ufo_shop/navbar.html:38
+msgid "Manage your shop"
+msgstr "Spravovat váš obchod"
+
+#: templates/ufo_shop/navbar.html:39
+msgid "Sales Statistics"
+msgstr "Statistiky prodeje"
+
+#: templates/ufo_shop/navbar.html:42
+msgid "Global Statistics"
+msgstr "Globální statistiky"
+
+#: templates/ufo_shop/navbar.html:43
+msgid "Admin Panel"
+msgstr "Admin panel"
+
+#: templates/ufo_shop/navbar.html:48
+msgid "Logout"
+msgstr "Odhlásit se"
+
+#: templates/ufo_shop/navbar.html:58 templates/ufo_shop/signup.html:5
+#: templates/ufo_shop/signup.html:13
+msgid "Sign Up"
+msgstr "Registrace"
+
+#: templates/ufo_shop/shop.html:11
+msgid "Filter Items"
+msgstr "Filtrovat položky"
+
+#: templates/ufo_shop/shop.html:14 templates/ufo_shop/item_card.html:23 templates/ufo_shop/item_detail.html:167
+msgid "Category"
+msgstr "Kategorie"
+
+#: templates/ufo_shop/shop.html:17
+msgid "All Categories"
+msgstr "Všechny kategorie"
+
+#: templates/ufo_shop/shop.html:42
+msgid "Item List"
+msgstr "Seznam položek"
+
+#: templates/ufo_shop/shop.html:52
+msgid "No items found matching your criteria."
+msgstr "Žádné položky neodpovídají vašim kritériím."
+
+#: templates/ufo_shop/shop.html:57
+msgid "Page navigation"
+msgstr "Navigace stránky"
+
+#: templates/ufo_shop/item_card.html:27
+msgid "Created By"
+msgstr "Vytvořil"
+
+#: templates/ufo_shop/order_confirmation.html:4
+msgid "Order Confirmation"
+msgstr "Potvrzení objednávky"
+
+#: templates/ufo_shop/order_confirmation.html:16
+msgid "Order Confirmed"
+msgstr "Objednávka potvrzena"
+
+#: templates/ufo_shop/order_confirmation.html:21
+msgid "Thank you for your order!"
+msgstr "Děkujeme za vaši objednávku!"
+
+#: templates/ufo_shop/order_confirmation.html:22
+msgid "Your order has been received and is being processed."
+msgstr "Vaše objednávka byla přijata a je zpracovávána."
+
+#: templates/ufo_shop/order_confirmation.html:23
+msgid "A confirmation email has been sent to"
+msgstr "Potvrzovací e-mail byl odeslán na"
+
+#: templates/ufo_shop/order_confirmation.html:28
+#, fuzzy
+#| msgid "Order Confirmation"
+msgid "Order Information"
+msgstr "Potvrzení objednávky"
+
+#: templates/ufo_shop/order_confirmation.html:29
+#, fuzzy
+#| msgid "Order Summary"
+msgid "Order Number"
+msgstr "Souhrn objednávky"
+
+#: templates/ufo_shop/order_confirmation.html:30
+#, fuzzy
+#| msgid "Order #"
+msgid "Order Date"
+msgstr "Objednávka č."
+
+#: templates/ufo_shop/order_confirmation.html:31
+msgid "Payment Method"
+msgstr ""
+
+#: templates/ufo_shop/order_confirmation.html:34
+msgid "Contact Information"
+msgstr "Kontaktní informace"
+
+#: templates/ufo_shop/order_confirmation.html:35
+#: templates/ufo_shop/profile.html:18
+msgid "Email"
+msgstr "Email"
+
+#: templates/ufo_shop/order_confirmation.html:36
+msgid "Phone"
+msgstr "Telefon"
+
+#: templates/ufo_shop/order_confirmation.html:47
+msgid "Pickup Location"
+msgstr ""
+
+#: templates/ufo_shop/order_confirmation.html:91
+#, fuzzy
+#| msgid "Shipping & Payment Information"
+msgid "Payment Information"
+msgstr "Informace o dopravě a platbě"
+
+#: templates/ufo_shop/order_confirmation.html:96
+msgid "QR Code Payment"
+msgstr ""
+
+#: templates/ufo_shop/order_confirmation.html:101
+msgid "Bank Account"
+msgstr ""
+
+#: templates/ufo_shop/order_confirmation.html:103
+msgid "Variable Symbol"
+msgstr ""
+
+#: templates/ufo_shop/order_confirmation.html:104
+msgid "Message"
+msgstr ""
+
+#: templates/ufo_shop/order_confirmation.html:111
+#, fuzzy
+#| msgid "Shipping & Payment Information"
+msgid "Payment Instructions"
+msgstr "Informace o dopravě a platbě"
+
+#: templates/ufo_shop/order_confirmation.html:113
+msgid "Scan the QR code with your banking app"
+msgstr ""
+
+#: templates/ufo_shop/order_confirmation.html:114
+msgid "Verify the payment details"
+msgstr ""
+
+#: templates/ufo_shop/order_confirmation.html:115
+msgid "Confirm the payment"
+msgstr ""
+
+#: templates/ufo_shop/order_confirmation.html:117
+#, fuzzy
+#| msgid "Your order has been received and is being processed."
+msgid "Your order will be processed once the payment is received."
+msgstr "Vaše objednávka byla přijata a je zpracovávána."
+
+#: templates/ufo_shop/order_confirmation.html:138
+msgid "Download Invoice"
+msgstr ""
+
+#: templates/ufo_shop/order_confirmation.html:141
+msgid "View All Orders"
+msgstr ""
+
+#: templates/ufo_shop/order_history.html:15
+msgid "Order #"
+msgstr "Objednávka č."
+
+#: templates/ufo_shop/order_history.html:16
+msgid "Date"
+msgstr "Datum"
+
+#: templates/ufo_shop/order_history.html:17
+msgid "Status"
+msgstr "Stav"
+
+#: templates/ufo_shop/order_history.html:29
+msgid "Ordered"
+msgstr "Objednáno"
+
+#: templates/ufo_shop/order_history.html:31
+msgid "Paid"
+msgstr "Zaplaceno"
+
+#: templates/ufo_shop/order_history.html:33
+msgid "Shipped"
+msgstr ""
+
+#: templates/ufo_shop/order_history.html:35
+msgid "Fulfilled"
+msgstr ""
+
+#: templates/ufo_shop/order_history.html:37
+msgid "Cancelled"
+msgstr ""
+
+#: templates/ufo_shop/order_history.html:55
+msgid "Invoice"
+msgstr ""
+
+#: templates/ufo_shop/order_history.html:66
+msgid "You don't have any orders yet."
+msgstr ""
+
+#: templates/ufo_shop/profile.html:19
+msgid "Name"
+msgstr "Jméno"
+
+#: templates/ufo_shop/profile.html:20
+msgid "Date joined"
+msgstr "Datum registrace"
+
+#: templates/ufo_shop/profile.html:21
+msgid "Is merchandiser"
+msgstr "Je prodejce"
+
+#: templates/ufo_shop/profile.html:28
+msgid "Back to Home"
+msgstr "Zpět na domovskou stránku"
+
+#: templates/ufo_shop/signup.html:19
+msgid "Already have an account?"
+msgstr "Již máte účet?"
+
+#: templates/ufo_shop/signup.html:19
+msgid "Log In"
+msgstr "Přihlásit se"
+
+#~ msgid "Add to Wishlist"
+#~ msgstr "Přidat do seznamu přání"
+
+#~ msgid "SKU"
+#~ msgstr "SKU"
+
+#~ msgid "DjangoShop"
+#~ msgstr "DjangoObchod"

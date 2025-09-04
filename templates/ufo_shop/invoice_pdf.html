@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+{% load ufo_shop_extras %}
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Faktura {{ invoice.invoice_number }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0.7cm;
+        }
+        body {
+            font-family: DejaVu Sans, Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 5px;
+            color: #333;
+            font-size: 8pt;
+            line-height: 1.2;
+        }
+        .invoice-container {
+            max-width: 100%;
+        }
+        .invoice-header {
+            display: table;
+            width: 100%;
+            margin-bottom: 10px;
+            background-color: #28a745;
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .header-left {
+            display: table-cell;
+            width: 70%;
+            vertical-align: middle;
+        }
+        .header-right {
+            display: table-cell;
+            width: 30%;
+            vertical-align: middle;
+            text-align: right;
+        }
+        .invoice-title {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 3px;
+            color: white;
+        }
+        .invoice-number {
+            font-size: 10pt;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        .invoice-dates {
+            margin-bottom: 3px;
+            font-size: 8pt;
+        }
+        .invoice-details {
+            display: table;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .issuer-info, .customer-info {
+            display: table-cell;
+            width: 50%;
+            vertical-align: top;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+        .info-box {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px;
+            background-color: #f9f9f9;
+            height: 100%;
+            box-sizing: border-box;
+        }
+        .info-title {
+            font-weight: bold;
+            margin-bottom: 3px;
+            padding-bottom: 2px;
+            border-bottom: 1px solid #ddd;
+            color: #28a745;
+        }
+        .invoice-items {
+            margin-bottom: 10px;
+        }
+        .invoice-items table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8pt;
+        }
+        .invoice-items th {
+            background-color: #28a745;
+            color: white;
+            padding: 4px 3px;
+            text-align: left;
+            font-weight: normal;
+        }
+        .invoice-items td {
+            padding: 3px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .invoice-items .item-name {
+            width: 45%;
+            overflow: hidden;
+            max-width: 200px;
+        }
+        .invoice-items .item-quantity {
+            width: 10%;
+            text-align: center;
+        }
+        .invoice-items .item-price {
+            width: 15%;
+            text-align: right;
+        }
+        .invoice-items .item-total {
+            width: 30%;
+            text-align: right;
+        }
+        .invoice-total {
+            text-align: right;
+            font-weight: bold;
+            font-size: 10pt;
+            margin-bottom: 10px;
+            padding: 3px 0;
+            border-top: 2px solid #28a745;
+        }
+        .invoice-footer {
+            margin-top: 10px;
+            font-size: 7pt;
+            color: #666;
+            text-align: center;
+        }
+        .payment-qr-section {
+            display: table;
+            width: 100%;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .payment-info {
+            display: table-cell;
+            width: 60%;
+            vertical-align: top;
+            padding: 8px;
+        }
+        .payment-title {
+            font-weight: bold;
+            margin-bottom: 3px;
+            color: #28a745;
+        }
+        .qr-code-container {
+            display: table-cell;
+            width: 40%;
+            vertical-align: middle;
+            text-align: center;
+            padding: 8px;
+        }
+        .logo {
+            max-width: 120px;
+            max-height: 50px;
+            margin-bottom: 5px;
+        }
+        .qr-code {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto;
+        }
+        .qr-code img {
+            width: 100%;
+            height: auto;
+        }
+        .qr-caption {
+            font-size: 7pt;
+            color: #666;
+            margin-top: 3px;
+        }
+        p {
+            margin: 2px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <!-- Header Section -->
+        <div class="invoice-header">
+            <div class="header-left">
+                <div class="invoice-title">FAKTURA - DAŇOVÝ DOKLAD</div>
+                <div class="invoice-number">Číslo faktury: {{ invoice.invoice_number }}</div>
+                <div class="invoice-dates">
+                    <span>Datum vystavení: {{ invoice.created_at|date:"d.m.Y" }}</span> | 
+                    <span>Datum splatnosti: {{ invoice.due_date|date:"d.m.Y" }}</span>
+                </div>
+            </div>
+            <div class="header-right">
+                {% if issuer.logo %}
+                    <img src="{{ issuer.logo.url }}" alt="{{ issuer.name }} Logo" class="logo">
+                {% else %}
+                    <!-- Use a default logo from static files -->
+                    <img src="/static/media/icons/Large logo.png" alt="{{ issuer.name }} Logo" class="logo">
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Issuer and Customer Information -->
+        <div class="invoice-details">
+            <div class="issuer-info">
+                <div class="info-box">
+                    <div class="info-title">Dodavatel:</div>
+                    <div><strong>{{ issuer.name }}</strong></div>
+                    <div>{{ issuer.address }}</div>
+                    <div>{{ issuer.postal_code }} {{ issuer.city }}</div>
+                    <div>{{ issuer.country }}</div>
+                    {% if issuer.registration_id %}
+                        <div>IČO: {{ issuer.registration_id }}</div>
+                    {% endif %}
+                    {% if issuer.tax_id %}
+                        <div>DIČ: {{ issuer.tax_id }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="customer-info">
+                <div class="info-box">
+                    <div class="info-title">Odběratel:</div>
+                    <div><strong>{{ order.user.get_full_name }}</strong></div>
+                    <div>{{ order.shipping_address }}</div>
+                    <div>{{ order.shipping_zip }} {{ order.shipping_city }}</div>
+                    <div>{{ order.shipping_country }}</div>
+                    <div>Email: {{ order.contact_email }}</div>
+                    {% if order.contact_phone %}
+                        <div>Telefon: {{ order.contact_phone }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Invoice Items -->
+        <div class="invoice-items">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="item-name">Položka</th>
+                        <th class="item-quantity">Množství</th>
+                        <th class="item-price">Cena/ks</th>
+                        <th class="item-total">Celkem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td class="item-name">{{ item.item.name }}</td>
+                        <td class="item-quantity">{{ item.amount }}</td>
+                        <td class="item-price">{{ item.item.price|floatformat:2 }} {{ invoice.currency }}</td>
+                        <td class="item-total">{{ item.amount|floatformat:0|multiply:item.item.price|floatformat:2 }} {{ invoice.currency }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if order.shipping_cost > 0 %}
+                    <tr>
+                        <td class="item-name">Doprava</td>
+                        <td class="item-quantity">1</td>
+                        <td class="item-price">{{ order.shipping_cost|floatformat:2 }} {{ invoice.currency }}</td>
+                        <td class="item-total">{{ order.shipping_cost|floatformat:2 }} {{ invoice.currency }}</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Invoice Total -->
+        <div class="invoice-total">
+            Celkem k úhradě: {{ invoice.total_amount|floatformat:2 }} {{ invoice.currency }}
+        </div>
+
+        <!-- Payment Information with QR Code -->
+        <div class="payment-qr-section">
+            <div class="payment-info">
+                <div class="payment-title">Platební údaje:</div>
+                {% if issuer.bank_account %}
+                    <div>Číslo účtu: {{ issuer.bank_account }}</div>
+                {% endif %}
+                {% if issuer.iban %}
+                    <div>IBAN: {{ issuer.iban }}</div>
+                {% endif %}
+                {% if issuer.swift %}
+                    <div>SWIFT: {{ issuer.swift }}</div>
+                {% endif %}
+                <div>Variabilní symbol: {{ order.id }}</div>
+                <div>Zpráva pro příjemce: Objednávka #{{ order.id }}</div>
+                <div>Částka: {{ invoice.total_amount|floatformat:2 }} {{ invoice.currency }}</div>
+            </div>
+            <div class="qr-code-container">
+                <div class="qr-code">
+                    {{ qr_code|safe }}
+                    <div class="qr-caption">Naskenujte pro platbu</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="invoice-footer">
+            <p>Děkujeme za Vaši objednávku!</p>
+            <p>Faktura byla vygenerována automaticky a je platná bez podpisu a razítka.</p>
+        </div>
+    </div>
+</body>
+</html>

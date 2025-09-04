@@ -1,0 +1,37 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'media/icons/favicon.png' %}" id="favicon">
+    
+    <!-- Dark Mode Favicon Switcher -->
+    <script>
+        // Function to set favicon based on color scheme
+        function setFavicon(isDarkMode) {
+            const favicon = document.getElementById('favicon');
+            if (isDarkMode) {
+                // Use dark mode favicon
+                favicon.href = "{% static 'media/icons/favicon-dark.png' %}";
+            } else {
+                // Use light mode favicon
+                favicon.href = "{% static 'media/icons/favicon.png' %}";
+            }
+        }
+
+        // Check if browser supports prefers-color-scheme
+        if (window.matchMedia) {
+            // Get the user's color scheme preference
+            const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+            // Set initial favicon based on current preference
+            setFavicon(darkModeMediaQuery.matches);
+
+            // Add listener to detect changes in color scheme preference
+            darkModeMediaQuery.addEventListener('change', (e) => {
+                setFavicon(e.matches);
+            });
+        }
+    </script>
+{% endblock %}

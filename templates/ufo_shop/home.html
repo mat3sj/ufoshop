@@ -36,7 +36,7 @@
                             <div class="card-body">
                                 <h5 class="card-title">{{ item.name }}</h5>
                                 <p class="card-text">{{ item.short_description }}</p>
-                                <p class="card-text"><strong>{{ item.price }} CZK</strong></p>
+                                <p class="card-text"><strong>{{ item.price }} {% trans "CZK" %}</strong></p>
                                 <a href="{% url 'item-detail' item.id %}" class="btn btn-primary">{% trans "View Details" %}</a>
                             </div>
                         </div>
@@ -82,11 +82,11 @@
                     </div>
                     <button class="carousel-control-prev" type="button" data-bs-target="#newsCarousel" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
+                        <span class="visually-hidden">{% trans "Previous" %}</span>
                     </button>
                     <button class="carousel-control-next" type="button" data-bs-target="#newsCarousel" data-bs-slide="next">
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
+                        <span class="visually-hidden">{% trans "Next" %}</span>
                     </button>
                 </div>
             {% else %}

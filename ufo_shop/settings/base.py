@@ -149,9 +149,16 @@ MEDIA_URL = '/media/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 AUTH_USER_MODEL = 'ufo_shop.User'
 LOGIN_REDIRECT_URL = '/'  # Redirect to the home page
+
+#############################
+# Sentry defaults (can be overridden in secrets)
+#############################
+SENTRY_DSN = ''  # keep empty by default; set in local_secrets.py or production_secrets.py
+SENTRY_TRACES_SAMPLE_RATE = 0.0  # set e.g. 0.2 in production to enable APM
+SENTRY_PROFILES_SAMPLE_RATE = 0.0  # set e.g. 0.1 to enable profiling
+SENTRY_ENVIRONMENT = ''  # override to 'production' on server if desired
 
 #############################
 # Email Settings

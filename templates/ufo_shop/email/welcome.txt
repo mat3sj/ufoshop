@@ -1,19 +1,19 @@
 {% extends "ufo_shop/email/email_base.txt" %}
 
 {% block content %}
-Dear {{ user.email }},
+Vážený/á {{ user.email }},
 
-Welcome to UFO Shop!
+Vítejte v UFO Shopu!
 
-We're excited to have you join our intergalactic marketplace! Thank you for creating an account with UFO Shop.
+Jsme rádi, že jste se připojil/a k naší mezihvězdné tržišti! Děkujeme za vytvoření účtu v UFO Shopu.
 
-Get ready to explore our unique collection of extraterrestrial items and cosmic curiosities.
+Připravte se prozkoumat naši jedinečnou kolekci mimozemských předmětů a kosmických rarit.
 
-Start Shopping: {{ shop_url }}
-View Your Profile: {{ profile_url }}
+Začít nakupovat: {{ shop_url }}
+Zobrazit profil: {{ profile_url }}
 
-If you have any questions, feel free to contact our support team.
+Máte-li jakékoli dotazy, neváhejte kontaktovat naši podporu.
 
-Best regards,
-The UFO Shop Team
+S pozdravem,
+Tým UFO Shopu
 {% endblock %}

@@ -1,29 +1,29 @@
 {% extends "ufo_shop/email/email_base.html" %}
 {% load i18n %}
 
-{% block title %}Order Confirmation - UFO Shop{% endblock %}
+{% block title %}Potvrzení objednávky - UFO Shop{% endblock %}
 
 {% block content %}
   <div class="email-content">
-    <h1>Order Confirmation</h1>
+    <h1>Potvrzení objednávky</h1>
 
     <div class="order-details">
-      <p>Dear {{ user.email }},</p>
-      <p>Thank you for your order! We're excited to confirm that your order has been received and is being processed.</p>
+      <p>Vážený/á {{ user.email }},</p>
+      <p>Děkujeme za Vaši objednávku! S radostí potvrzujeme, že jsme ji obdrželi a právě ji zpracováváme.</p>
 
-      <h2>Order Details</h2>
-      <p><strong>Order Number:</strong> #{{ order.id }}</p>
-      <p><strong>Order Date:</strong> {{ order.created_at|date:"F j, Y" }}</p>
+      <h2>Detaily objednávky</h2>
+      <p><strong>Číslo objednávky:</strong> #{{ order.id }}</p>
+      <p><strong>Datum objednávky:</strong> {{ order.created_at|date:"j. n. Y" }}</p>
 
-      <h3>Items</h3>
+      <h3>Položky</h3>
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
         <thead>
           <tr style="background-color: #f8f9fa; border-bottom: 1px solid #dee2e6;">
-            <th style="padding: 10px; text-align: left;">Item</th>
-            <th style="padding: 10px; text-align: right;">Price</th>
-            <th style="padding: 10px; text-align: center;">Quantity</th>
-            <th style="padding: 10px; text-align: left;">Pickup Location</th>
-            <th style="padding: 10px; text-align: right;">Total</th>
+            <th style="padding: 10px; text-align: left;">Položka</th>
+            <th style="padding: 10px; text-align: right;">Cena</th>
+            <th style="padding: 10px; text-align: center;">Množství</th>
+            <th style="padding: 10px; text-align: left;">Místo vyzvednutí</th>
+            <th style="padding: 10px; text-align: right;">Celkem</th>
           </tr>
         </thead>
         <tbody>
@@ -39,7 +39,7 @@
                   <div style="font-size: 0.85em; color: #6c757d;">{{ item.pickup_location.note }}</div>
                 {% endif %}
               {% else %}
-                {% trans "Not specified" %}
+                Není uvedeno
               {% endif %}
             </td>
             <td style="padding: 10px; text-align: right;">{{ item.item.price|floatformat:2 }} {% trans "CZK" %}</td>
@@ -48,15 +48,15 @@
         </tbody>
         <tfoot>
           <tr>
-            <td colspan="4" style="padding: 10px; text-align: right;"><strong>Subtotal:</strong></td>
+            <td colspan="4" style="padding: 10px; text-align: right;"><strong>Mezisoučet:</strong></td>
             <td style="padding: 10px; text-align: right;"><strong>{{ order.subtotal|floatformat:2 }} {% trans "CZK" %}</strong></td>
           </tr>
           <tr>
-            <td colspan="4" style="padding: 10px; text-align: right;"><strong>Shipping:</strong></td>
+            <td colspan="4" style="padding: 10px; text-align: right;"><strong>Doprava:</strong></td>
             <td style="padding: 10px; text-align: right;"><strong>{{ order.shipping_cost|floatformat:2 }} {% trans "CZK" %}</strong></td>
           </tr>
           <tr>
-            <td colspan="4" style="padding: 10px; text-align: right;"><strong>Total:</strong></td>
+            <td colspan="4" style="padding: 10px; text-align: right;"><strong>Celkem:</strong></td>
             <td style="padding: 10px; text-align: right;"><strong>{{ order.total|floatformat:2 }} {% trans "CZK" %}</strong></td>
           </tr>
         </tfoot>
@@ -65,17 +65,17 @@
 
     {% if order.payment_method == 'qr_code' %}
     <div style="margin-top: 30px; margin-bottom: 30px;">
-      <h2>Payment Information</h2>
+      <h2>Platební informace</h2>
       <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px;">
-        <h3 style="color: #0d6efd;">QR Code Payment</h3>
-        <p>Please use the following information to complete your payment:</p>
+        <h3 style="color: #0d6efd;">Platba QR kódem</h3>
+        <p>Pro dokončení platby použijte následující údaje:</p>
         <ul>
-          <li><strong>Bank Account:</strong> {{ BANK_ACCOUNT.account_number }}</li>
-          <li><strong>Amount:</strong> {{ order.total|floatformat:2 }} {{ BANK_ACCOUNT.currency }}</li>
-          <li><strong>Variable Symbol:</strong> {{ order.id }}</li>
-          <li><strong>Message:</strong> Order #{{ order.id }} - {{ order.contact_email }}</li>
+          <li><strong>Bankovní účet:</strong> {{ BANK_ACCOUNT.account_number }}</li>
+          <li><strong>Částka:</strong> {{ order.total|floatformat:2 }} {{ BANK_ACCOUNT.currency }}</li>
+          <li><strong>Variabilní symbol:</strong> {{ order.id }}</li>
+          <li><strong>Zpráva:</strong> Objednávka #{{ order.id }} - {{ order.contact_email }}</li>
         </ul>
-        <p>You can scan the QR code below to complete your payment:</p>
+        <p>Pro dokončení platby můžete naskenovat níže uvedený QR kód:</p>
         <div style="margin: 20px 0;">
           {% if qr_cid %}
             <img src="cid:{{ qr_cid }}" alt="Payment QR Code" style="max-width: 100%; height: auto;" />
@@ -88,13 +88,13 @@
     {% endif %}
 
     <div class="cta-buttons">
-      <a href="{{ order_url }}" class="btn">View Order Details</a>
+      <a href="{{ order_url }}" class="btn">Zobrazit detaily objednávky</a>
     </div>
 
     <div class="footer-info">
-      <p>If you have any questions about your order, please contact our support team.</p>
-      <p>Thank you for shopping with us!</p>
-      <p>Best regards,<br>The UFO Shop Team</p>
+      <p>Máte-li jakékoli dotazy k Vaší objednávce, kontaktujte prosím naši podporu.</p>
+      <p>Děkujeme, že nakupujete u nás!</p>
+      <p>S pozdravem,<br>Tým UFO Shopu</p>
     </div>
   </div>
 {% endblock %}

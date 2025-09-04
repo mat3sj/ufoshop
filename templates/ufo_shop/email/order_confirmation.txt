@@ -2,33 +2,33 @@
 {% load i18n %}
 
 {% block content %}
-Order Confirmation
+Potvrzení objednávky
 
-Dear {{ user.email }},
+Vážený/á {{ user.email }},
 
-Thank you for your order! We're excited to confirm that your order has been received and is being processed.
+Děkujeme za Vaši objednávku! S radostí potvrzujeme, že jsme ji obdrželi a právě ji zpracováváme.
 
-Order Details
--------------
-Order Number: #{{ order.id }}
-Order Date: {{ order.created_at|date:"F j, Y" }}
+Detaily objednávky
+------------------
+Číslo objednávky: #{{ order.id }}
+Datum objednávky: {{ order.created_at|date:"j. n. Y" }}
 
-Items
------
+Položky
+-------
 {% for item in items %}
 {{ item.item.name }} - {{ item.item.price|floatformat:2 }} {% trans "CZK" %} x {{ item.amount }} = {{ item.item.price|floatformat:2 }} {% trans "CZK" %}
 {% endfor %}
 
-Subtotal: {{ order.subtotal|floatformat:2 }} {% trans "CZK" %}
-Shipping: {{ order.shipping_cost|floatformat:2 }} {% trans "CZK" %}
-Total: {{ order.total|floatformat:2 }} {% trans "CZK" %}
+Mezisoučet: {{ order.subtotal|floatformat:2 }} {% trans "CZK" %}
+Doprava: {{ order.shipping_cost|floatformat:2 }} {% trans "CZK" %}
+Celkem: {{ order.total|floatformat:2 }} {% trans "CZK" %}
 
-View Order Details: {{ order_url }}
+Zobrazit detaily objednávky: {{ order_url }}
 
-If you have any questions about your order, please contact our support team.
+Máte-li jakékoli dotazy k Vaší objednávce, kontaktujte prosím naši podporu.
 
-Thank you for shopping with us!
+Děkujeme, že nakupujete u nás!
 
-Best regards,
-The UFO Shop Team
+S pozdravem,
+Tým UFO Shopu
 {% endblock %}

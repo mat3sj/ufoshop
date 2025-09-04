@@ -2,6 +2,6 @@
 {% endblock %}
 
 --
-UFO Shop - Your Ultimate Flying Objects Store
-Contact us: support@ufoshop.com
-© {% now "Y" %} UFO Shop. All rights reserved.
+UFO Shop - Váš obchod s létajícími objekty
+Kontaktujte nás: support@ufoshop.com
+© {% now "Y" %} UFO Shop. Všechna práva vyhrazena.

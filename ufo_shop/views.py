@@ -60,7 +60,7 @@ class SignUpView(CreateView):
         profile_url = self.request.build_absolute_uri(reverse_lazy('profile'))
         shop_url = self.request.build_absolute_uri(reverse_lazy('shop'))
         ufoshop_send_email(
-            subject='Welcome to UFO Shop!',
+            subject='Vítejte v UFO Shopu!',
             html_message=render_to_string('ufo_shop/email/welcome.html', {
                 'user': user,
                 'profile_url': profile_url,

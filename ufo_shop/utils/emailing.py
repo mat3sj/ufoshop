@@ -145,7 +145,7 @@ def send_order_confirmation_email(order, request=None):
 
     # Build and send
     msg = EmailMultiAlternatives(
-        subject='Your Order Confirmation',
+        subject='Potvrzení objednávky',
         body=plain_message,
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=[order.contact_email],

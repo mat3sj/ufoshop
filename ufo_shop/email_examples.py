@@ -38,7 +38,7 @@ def send_welcome_email(user_id: int, request=None) -> None:
         # Send the email
         send_template_email(
             recipient_list=[user.email],
-            subject="Welcome to UFO Shop!",
+            subject="Vítejte v UFO Shopu!",
             template_name="ufo_shop/email/welcome.html",
             context=context,
             plain_template_name="ufo_shop/email/welcome.txt"

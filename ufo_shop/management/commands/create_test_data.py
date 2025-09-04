@@ -1,7 +1,6 @@
 from django.core.management import BaseCommand
 from django.db import IntegrityError
 import logging
-from django.contrib.auth.models import User, Group
 from django.conf import settings
 from ufo_shop.models import *
 
@@ -21,6 +20,7 @@ def decorate_model_creation(model):
     logger.info('########################')
     logger.info('Creating %ss', model.__name__)
     logger.info('########################')
+
 
 class Command(BaseCommand):
     help = f'Create some data in order to play with during the developement'

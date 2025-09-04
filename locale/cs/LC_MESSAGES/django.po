@@ -488,23 +488,23 @@ msgstr "Přidat barevnou variantu"
 #: templates/ufo_shop/item_form.html:30
 #: templates/ufo_shop/merchandiser_shop.html:56
 msgid "Description"
-msgstr ""
+msgstr "Popis"
 
 #: templates/ufo_shop/item_form.html:44
 msgid "Existing Images"
-msgstr ""
+msgstr "Existující obrázky"
 
 #: templates/ufo_shop/item_form.html:45
 msgid "Select images to delete"
-msgstr ""
+msgstr "Vyberte obrázky ke smazání"
 
 #: templates/ufo_shop/item_form.html:57
 msgid "Delete"
-msgstr ""
+msgstr "Smazat"
 
 #: templates/ufo_shop/item_form.html:66
 msgid "Delete Selected Images"
-msgstr ""
+msgstr "Smazat vybrané obrázky"
 
 #: templates/ufo_shop/login.html:6 templates/ufo_shop/login.html:15
 #: templates/ufo_shop/navbar.html:55
@@ -563,11 +563,11 @@ msgstr "Přidat barevnou variantu"
 #: templates/ufo_shop/merchandiser_shop.html:74
 #: templates/ufo_shop/order_confirmation.html:102
 msgid "Amount"
-msgstr ""
+msgstr "Částka"
 
 #: templates/ufo_shop/merchandiser_shop.html:58
 msgid "Color"
-msgstr ""
+msgstr "Barva"
 
 #: templates/ufo_shop/merchandiser_shop.html:65
 msgid "Color Variants"
@@ -676,7 +676,7 @@ msgstr "Objednávka č."
 
 #: templates/ufo_shop/order_confirmation.html:31
 msgid "Payment Method"
-msgstr ""
+msgstr "Platební metoda"
 
 #: templates/ufo_shop/order_confirmation.html:34
 msgid "Contact Information"
@@ -693,7 +693,7 @@ msgstr "Telefon"
 
 #: templates/ufo_shop/order_confirmation.html:47
 msgid "Pickup Location"
-msgstr ""
+msgstr "Místo vyzvednutí"
 
 #: templates/ufo_shop/order_confirmation.html:91
 #, fuzzy
@@ -703,51 +703,51 @@ msgstr "Informace o dopravě a platbě"
 
 #: templates/ufo_shop/order_confirmation.html:96
 msgid "QR Code Payment"
-msgstr ""
+msgstr "Platba pomocí QR kódu"
 
 #: templates/ufo_shop/order_confirmation.html:101
 msgid "Bank Account"
-msgstr ""
+msgstr "Bankovní účet"
 
 #: templates/ufo_shop/order_confirmation.html:103
 msgid "Variable Symbol"
-msgstr ""
+msgstr "Variabilní symbol"
 
 #: templates/ufo_shop/order_confirmation.html:104
 msgid "Message"
-msgstr ""
+msgstr "Zpráva"
 
 #: templates/ufo_shop/order_confirmation.html:111
 #, fuzzy
 #| msgid "Shipping & Payment Information"
 msgid "Payment Instructions"
-msgstr "Informace o dopravě a platbě"
+msgstr "Platební instrukce"
 
 #: templates/ufo_shop/order_confirmation.html:113
 msgid "Scan the QR code with your banking app"
-msgstr ""
+msgstr "Naskenujte QR kód ve své bankovní aplikaci"
 
 #: templates/ufo_shop/order_confirmation.html:114
 msgid "Verify the payment details"
-msgstr ""
+msgstr "Zkontrolujte platební údaje"
 
 #: templates/ufo_shop/order_confirmation.html:115
 msgid "Confirm the payment"
-msgstr ""
+msgstr "Potvrďte platbu"
 
 #: templates/ufo_shop/order_confirmation.html:117
 #, fuzzy
 #| msgid "Your order has been received and is being processed."
 msgid "Your order will be processed once the payment is received."
-msgstr "Vaše objednávka byla přijata a je zpracovávána."
+msgstr "Vaše objednávka bude zpracována po přijetí platby."
 
 #: templates/ufo_shop/order_confirmation.html:138
 msgid "Download Invoice"
-msgstr ""
+msgstr "Stáhnout fakturu"
 
 #: templates/ufo_shop/order_confirmation.html:141
 msgid "View All Orders"
-msgstr ""
+msgstr "Zobrazit všechny objednávky"
 
 #: templates/ufo_shop/order_history.html:15
 msgid "Order #"
@@ -771,23 +771,23 @@ msgstr "Zaplaceno"
 
 #: templates/ufo_shop/order_history.html:33
 msgid "Shipped"
-msgstr ""
+msgstr "Odesláno"
 
 #: templates/ufo_shop/order_history.html:35
 msgid "Fulfilled"
-msgstr ""
+msgstr "Vyřízeno"
 
 #: templates/ufo_shop/order_history.html:37
 msgid "Cancelled"
-msgstr ""
+msgstr "Zrušeno"
 
 #: templates/ufo_shop/order_history.html:55
 msgid "Invoice"
-msgstr ""
+msgstr "Faktura"
 
 #: templates/ufo_shop/order_history.html:66
 msgid "You don't have any orders yet."
-msgstr ""
+msgstr "Zatím nemáte žádné objednávky."
 
 #: templates/ufo_shop/profile.html:19
 msgid "Name"

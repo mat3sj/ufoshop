@@ -18,8 +18,21 @@
                 <p><strong>{% trans "Email" %}:</strong> {{ user.email }}</p>
                 <p><strong>{% trans "Name" %}:</strong> {{ user.first_name }} {{ user.last_name }}</p>
                 <p><strong>{% trans "Date joined" %}:</strong> {{ user.date_joined|date }}</p>
-                <p><strong>{% trans "Is merchandiser" %}:</strong> {% if user.is_merchandiser %}✅{% else %}
-                  ❌{% endif %}</p>
+                <p><strong>{% trans "Is merchandiser" %}:</strong>
+                  {% if user.is_merchandiser %}
+                    ✅
+                  {% else %}
+                    ❌
+                    {% if user.merchandiser_request_at %}
+                      <span class="badge bg-secondary ms-2">Žádost odeslána {{ user.merchandiser_request_at|date:"j. n. Y H:i" }}</span>
+                    {% else %}
+                      <form method="post" action="{% url 'profile' %}" class="d-inline ms-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-primary">Požádat o oprávnění merchandisera</button>
+                      </form>
+                    {% endif %}
+                  {% endif %}
+                </p>
 
               </div>
             </div>

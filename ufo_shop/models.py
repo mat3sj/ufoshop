@@ -59,6 +59,7 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     phone = models.CharField(max_length=15, verbose_name="Phone Number", blank=True, null=True)
     is_merchandiser = models.BooleanField(default=False, verbose_name="Is Merchandiser")
+    merchandiser_request_at = models.DateTimeField(blank=True, null=True, verbose_name="Merchandiser request at")
     # Change the identification field for authentication to 'email'
     email = models.EmailField(unique=True, verbose_name="Email Address")
     username = None

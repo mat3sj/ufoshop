@@ -69,6 +69,13 @@
 
     <!-- Main Content -->
     <div class="container content">
+        {% if messages %}
+          <div class="mt-2">
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags|default:'info' }}" role="alert">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
         {% block content %}
         <!-- Default content comes here -->
         {% endblock %}

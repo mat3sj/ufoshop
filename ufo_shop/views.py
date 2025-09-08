@@ -81,6 +81,26 @@ class ProfileView(LoginRequiredMixin, View):
             'user': request.user
         })
 
+    def post(self, request):
+        # Handle request for merchandiser permission
+        user = request.user
+        from django.utils import timezone
+        if user.is_merchandiser:
+            messages.info(request, "Již máte oprávnění merchandisera.")
+        elif user.merchandiser_request_at:
+            messages.info(request, "Žádost již byla odeslána dne %s." % user.merchandiser_request_at.strftime('%d.%m.%Y %H:%M'))
+        else:
+            user.merchandiser_request_at = timezone.now()
+            user.save(update_fields=['merchandiser_request_at'])
+            # send email to admins
+            from ufo_shop.utils.emailing import notify_admins_merchandiser_request
+            try:
+                notify_admins_merchandiser_request(user, request=request)
+                messages.success(request, "Žádost o oprávnění merchandisera byla odeslána administrátorům.")
+            except Exception:
+                messages.warning(request, "Žádost byla zaznamenána, ale nepodařilo se odeslat e-mail administrátorům.")
+        return redirect('profile')
+
 class MerchandiserSignupView(LoginRequiredMixin,View):
     # def get(self, request):
     #     user = request.user

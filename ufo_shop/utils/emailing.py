@@ -2,10 +2,11 @@ from typing import Dict, Any, Sequence, Optional
 
 from django.conf import settings
 from django.core.mail import send_mail
+from django.urls import reverse
 
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-
+from django.core.mail import EmailMultiAlternatives
 
 def render_email_template(template_name: str, context: Dict[str, Any]) -> str:
     """
@@ -90,6 +91,52 @@ def send_template_email(
 
     # Send the email
     ufoshop_send_email(recipient_list, subject, html_message, plain_message)
+
+
+def notify_admins_merchandiser_request(user, request=None):
+    """Notify admins that a user requested merchandiser permission.
+
+    Includes a direct link to the Django admin user change page.
+    """
+    # Resolve admin URL for user change
+    admin_path = reverse('admin:ufo_shop_user_change', args=[user.id])
+    try:
+        admin_url = request.build_absolute_uri(admin_path) if request else admin_path
+    except Exception:
+        admin_url = admin_path
+
+    subject = 'Žádost o oprávnění merchandisera'
+
+    context = {
+        'user': user,
+        'admin_url': admin_url,
+    }
+
+    # Render nicer email using templates
+    html_message = render_email_template('ufo_shop/email/merchandiser_request.html', context)
+    plain_message = render_email_template('ufo_shop/email/merchandiser_request.txt', context)
+
+    # Requirement: use only DEFAULT_FROM_EMAIL – send to this address
+    recipient = getattr(settings, 'DEFAULT_FROM_EMAIL', '')
+    recipient_list = [recipient] if recipient else []
+
+    if not recipient_list:
+        # Fallback: just print via debug helper
+        return ufoshop_send_email(
+            recipient_list=['devnull@example.com'],
+            subject=subject,
+            html_message=html_message,
+            plain_message=plain_message,
+        )
+
+    msg = EmailMultiAlternatives(
+        subject=subject,
+        body=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=recipient_list,
+    )
+    msg.attach_alternative(html_message, 'text/html')
+    msg.send(fail_silently=False)
 
 
 def send_order_confirmation_email(order, request=None):
